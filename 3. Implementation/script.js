@@ -57,54 +57,13 @@ class EdgeUi {
 	}
 
 	display() {
-		const r = this.from.radius;
 		const x1 = this.from.x;
 		const y1 = this.from.y;
 		const x2 = this.to.x;
 		const y2 = this.to.y;
 		
-		const angle1 = Math.atan(Math.abs(x2-x1) / Math.abs(y2-y1));
-		const a = r*Math.cos(angle1);
-		const b = r*Math.sin(angle1);
-
-		let fromX = x1;
-		let fromY = y1;
-		let toX = x2; // WHY 
-		let toY = y2; // WHY
-
-		if (y2 <= y1) { // bottom
-			fromY -= a;
-
-			if (x2 >= x1) // right
-				fromX += b;
-			else
-				fromX -= b;
-		} 
-		else { // top
-			fromY += a;
-
-			if (x2 >= x1)
-				fromX += b;
-			else
-				fromX -= b;
-		}
-
-		if (y1 <= y2) { // bottom
-			toY -= a;
-		
-			if (x1 >= x2) // right
-				toX += b;
-			else
-				toX -= b;
-		}
-		else { // top
-			toY += a;
-
-			if (x1 >= x2)
-				toX += b;
-			else
-				toX -= b;
-		}
+		const [fromX, fromY] = this.getCoords(x1, y1, x2, y2);
+		const [toX, toY] = this.getCoords(x2, y2, x1, y1);
 
 		const edge = `
 			<line x1="${fromX}" y1="${fromY}" x2="${toX}" y2="${toY}" stroke="black" stroke-width="2" />
@@ -114,7 +73,27 @@ class EdgeUi {
 	}
 
 	getCoords(x1, y1, x2, y2) {
+		const r = this.from.radius;
+		const angle = Math.atan(Math.abs(x2-x1) / Math.abs(y2-y1));
+		const a = r*Math.cos(angle);
+		const b = r*Math.sin(angle);
 
+		let x = x1;
+		let y = y1;
+
+		// Here we are getting the coordinates at the surface of the circle, but there are 4 qudrants in the circle {top-left, top-right, bottom-left, bottom-right}
+		// That is why we are handling each of those cases separately to adjust the (x, y) coordinates at the circle surface
+		if (y2 <= y1) // bottom
+			y -= a;
+		else // top
+			y += a;
+
+		if (x2 >= x1) // right
+			x += b;
+		else // left
+			x -= b;
+
+		return [x, y];
 	}
 }
 
@@ -126,20 +105,26 @@ class EdgeUi {
 // 	[1, 2]
 // ];
 
-const graph = [
-	[1, 2],
-	[0, 2],
-	[0, 1],
-];
+// const graph = [
+// 	[1, 2],
+// 	[0, 2],
+// 	[0, 1],
+// ];
 
 // const graph = [
 // 	[1],
 // 	[0]
 // ];
 
+const graph = [
+	[1],
+	[0, 2],
+	[1, 3],
+	[2, 4],
+	[3]
+]
 
-const nodeMapper = {
-}
+const nodeMapper = {}
 
 for (let i = 0; i < graph.length; i++) {
 	const node = new Node(i);
