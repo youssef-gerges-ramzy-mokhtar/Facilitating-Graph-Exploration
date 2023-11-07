@@ -4,6 +4,8 @@ function print(anything, ...rest) {
 	console.log(anything, ...rest);
 }
 
+const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
+
 /*
 Recipe:
 1. create a class for a Node
@@ -24,7 +26,7 @@ Recipe:
 
 const svg = document.getElementById("graph_canvas");
 
-class Node {
+class NodeUi {
 	constructor(value, col, x, y) {
 		this.value = value;
 		this.col = col;
@@ -97,48 +99,88 @@ class EdgeUi {
 	}
 }
 
-// const graph = [
-// 	[1, 3],
-// 	[0, 2, 4],
-// 	[1, 3],
-// 	[0, 2],
-// 	[1, 2]
-// ];
+class GraphUi {
+	constructor() {
+		this.nodeToNum = {};
+		this.numToNode = {};
+		this.graphAdjList = [];
+	}
 
-// const graph = [
-// 	[1, 2],
-// 	[0, 2],
-// 	[0, 1],
-// ];
+	readAdjacencyMatrix(adjMatrix) {
+		// to implement later
+	}
 
-// const graph = [
-// 	[1],
-// 	[0]
-// ];
+	readAdjacencyList(adjList) {
+		this.graphAdjList = adjList;
+		this.#updateGraphMapping();
+	}
 
-const graph = [
-	[1],
-	[0, 2],
-	[1, 3],
-	[2, 4],
-	[3]
-]
+	readEdgeList() {
+		// to implement later
+	}
 
-const nodeMapper = {}
+	drawGraph() {
+		svg.innerHTML = "<rect width='750' height='350' style='fill:rgb(255,255,255);stroke-width:10;stroke:rgb(0,0,0)'/>";
+		for (let i = 0; i < this.graphAdjList.length; i++) {
+			const node = this.numToNode[i];
+			node.display();
+		}
 
-for (let i = 0; i < graph.length; i++) {
-	const node = new Node(i);
-	nodeMapper[i] = node;
-	node.display();
-}
+		for (let node = 0; node < this.graphAdjList.length; node++) {
+			for (let neighbour of this.graphAdjList[node]) {
+				const fromNode = this.numToNode[node];
+				const toNode = this.numToNode[neighbour];
+				const edge = new EdgeUi(fromNode, toNode);
+				edge.display();
+			}
+		}		
+	}
 
-for (let i = 0; i < graph.length; i++) {
-	for (let j = 0; j < graph[i].length; j++) {
-		const from = nodeMapper[i];
-		const toIdx = graph[i][j];
-		const to = nodeMapper[toIdx];
-
-		const edge = new EdgeUi(from, to);
-		edge.display();
+	#updateGraphMapping() {
+		this.nodeToNum = this.numToNode = {};
+		for (let i = 0; i < this.graphAdjList.length; i++) {
+			const node = new NodeUi(i);
+			this.numToNode[i] = node;
+			this.nodeToNum[node] = i;
+		}
 	}
 }
+
+async function main() {
+	const graphSamples = [
+		[
+			[1, 3],
+			[0, 2, 4],
+			[1, 3],
+			[0, 2],
+			[1, 2]
+		],
+
+		[
+			[1, 2],
+			[0, 2],
+			[0, 1],
+		],
+
+		[
+			[1],
+			[0]
+		],
+
+		[
+			[1],
+			[0, 2],
+			[1, 3],
+			[2, 4],
+			[3]
+		]
+	];
+
+	const g = new GraphUi();
+	for (const graph of graphSamples) {
+		g.readAdjacencyList(graph);
+		g.drawGraph();		
+		await sleep(1500);
+	}
+}
+main();
