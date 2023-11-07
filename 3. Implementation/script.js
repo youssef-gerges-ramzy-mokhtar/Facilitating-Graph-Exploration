@@ -57,12 +57,64 @@ class EdgeUi {
 	}
 
 	display() {
-		const radius = this.from.radius;
+		const r = this.from.radius;
+		const x1 = this.from.x;
+		const y1 = this.from.y;
+		const x2 = this.to.x;
+		const y2 = this.to.y;
+		
+		const angle1 = Math.atan(Math.abs(x2-x1) / Math.abs(y2-y1));
+		const a = r*Math.cos(angle1);
+		const b = r*Math.sin(angle1);
+
+		let fromX = x1;
+		let fromY = y1;
+		let toX = x2; // WHY 
+		let toY = y2; // WHY
+
+		if (y2 <= y1) { // bottom
+			fromY -= a;
+
+			if (x2 >= x1) // right
+				fromX += b;
+			else
+				fromX -= b;
+		} 
+		else { // top
+			fromY += a;
+
+			if (x2 >= x1)
+				fromX += b;
+			else
+				fromX -= b;
+		}
+
+		if (y1 <= y2) { // bottom
+			toY -= a;
+		
+			if (x1 >= x2) // right
+				toX += b;
+			else
+				toX -= b;
+		}
+		else { // top
+			toY += a;
+
+			if (x1 >= x2)
+				toX += b;
+			else
+				toX -= b;
+		}
+
 		const edge = `
-			<line x1="${this.from.x}" y1="${this.from.y}" x2="${this.to.x}" y2="${this.to.y}" stroke="black" stroke-width="2" />
+			<line x1="${fromX}" y1="${fromY}" x2="${toX}" y2="${toY}" stroke="black" stroke-width="2" />
 		`
 
 		svg.insertAdjacentHTML("beforeend", edge);
+	}
+
+	getCoords(x1, y1, x2, y2) {
+
 	}
 }
 
@@ -78,9 +130,13 @@ const graph = [
 	[1, 2],
 	[0, 2],
 	[0, 1],
-	// [0, 2],
-	// [1, 2]
 ];
+
+// const graph = [
+// 	[1],
+// 	[0]
+// ];
+
 
 const nodeMapper = {
 }
@@ -91,7 +147,7 @@ for (let i = 0; i < graph.length; i++) {
 	node.display();
 }
 
-for (let i = 0; i < 5; i++) {
+for (let i = 0; i < graph.length; i++) {
 	for (let j = 0; j < graph[i].length; j++) {
 		const from = nodeMapper[i];
 		const toIdx = graph[i][j];
