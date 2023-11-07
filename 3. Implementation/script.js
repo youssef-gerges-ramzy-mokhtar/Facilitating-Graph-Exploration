@@ -100,6 +100,15 @@ class EdgeUi {
 }
 
 class GraphUi {
+	/*
+	Thoughts:
+		- Might want to remove the nodeToNum Mapper and the numToNode Mapper
+			[.] Reason can simply create the graphAdjList to map NodeUi objects to an array of NodeUi objects
+			[.] graphAdjList: Map<NodeUi, Array<NodeUi>>, this transformation will happen in the reading functions
+
+		- Might want to keep the graphAdjList without change to allow other code/algorithms that will need to deal with the graph 
+		  to have a standard view of the graph which is a simple Adjacency List Representation
+	*/
 	constructor() {
 		this.nodeToNum = {};
 		this.numToNode = {};
