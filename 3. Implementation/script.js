@@ -18,9 +18,7 @@ Recipe:
 	- Test that this class can link to the SVG element on the HTML
 	- Test that the class provides functionality like changing the edge stroke size, color, etc...
 
-3. Hardcode a small graph represented as an Adjacency List
-4. Consider abstracting away the usage between the SVG Tags and the Node & EdgeUI Classes
-5. Handle the case when changing the node position and calling the draw() method the old node should be deleted and the new node should be redrawn
+3. Consider abstracting away the usage between the SVG Tags and the Node & EdgeUI Classes
 
 */
 
@@ -49,6 +47,23 @@ class NodeUi {
 		`
 
 		svg.insertAdjacentHTML("beforeend", node);
+	}
+
+	setX(x) {
+		this.x = this.#validatePos(x, 750 - this.radius);
+	}
+
+	setY(y) {
+		this.y = this.#validatePos(y, 350 - this.radius);
+	}
+
+	#validatePos(pos, maxRange) {
+		if (pos < this.radius)
+			return this.radius;
+		if (pos > maxRange)
+			return maxRange;
+
+		return pos;
 	}
 }
 
@@ -97,6 +112,10 @@ class EdgeUi {
 
 		return [x, y];
 	}
+
+	getEdgeLength() {
+		return Math.sqrt(Math.pow(this.from.x - this.to.x, 2) + Math.pow(this.from.y - this.to.y, 2));
+	}
 }
 
 class GraphUi {
@@ -113,6 +132,10 @@ class GraphUi {
 		this.nodeToNum = {};
 		this.numToNode = {};
 		this.graphAdjList = [];
+
+		this.k1 = 10;
+		this.k2 = Math.pow(1500, 2);
+		this.l = 130;
 	}
 
 	readAdjacencyMatrix(adjMatrix) {
@@ -128,7 +151,59 @@ class GraphUi {
 		// to implement later
 	}
 
-	drawGraph() {
+	calcForce(v) {
+		let fx = 0, fy = 0;
+
+		const node = this.numToNode[v];
+		for (const neighbour of this.graphAdjList[v]) {
+			const neighbourNode = this.numToNode[neighbour];
+			const edge = new EdgeUi(node, neighbourNode);
+			const edgeLength = edge.getEdgeLength();
+
+			print(edgeLength)
+
+			const force = this.k1 * (edgeLength - this.l);
+			fx += force * ((neighbourNode.x - node.x) / edgeLength);
+			fy += force * ((neighbourNode.y - node.y) / edgeLength);
+		}
+
+		for (let i = 0; i < this.graphAdjList.length; i++) {
+			if (i == v)
+				continue;
+
+			const neighbourNode = this.numToNode[i];
+			const edge = new EdgeUi(node, neighbourNode);
+			const edgeLength = edge.getEdgeLength();
+
+			const force = this.k2 / Math.pow(edgeLength, 2);
+			fx += force * ((node.x - neighbourNode.x) / edgeLength);
+			fy += force * ((node.y - neighbourNode.y) / edgeLength);
+		}
+
+		return [fx, fy];
+	}
+
+	async drawGraph() {
+		let rate = 0.01;
+
+		for (let i = 0; i < 10_000; i++) {
+			for (let v = 0; v < this.graphAdjList.length; v++) {
+				this.displayGraph();
+
+				const [xForce, yForce] = this.calcForce(v);
+				const x = rate*xForce;
+				const y = rate*yForce;
+
+				const node = this.numToNode[v];
+				node.setX(node.x + x);
+				node.setY(node.y + y);
+
+				await sleep(10);
+			}
+		}
+	}
+
+	displayGraph() {
 		svg.innerHTML = "<rect width='750' height='350' style='fill:rgb(255,255,255);stroke-width:10;stroke:rgb(0,0,0)'/>";
 		for (let i = 0; i < this.graphAdjList.length; i++) {
 			const node = this.numToNode[i];
@@ -142,7 +217,7 @@ class GraphUi {
 				const edge = new EdgeUi(fromNode, toNode);
 				edge.display();
 			}
-		}		
+		}
 	}
 
 	#updateGraphMapping() {
@@ -157,39 +232,75 @@ class GraphUi {
 
 async function main() {
 	const graphSamples = [
-		[
-			[1, 3],
-			[0, 2, 4],
-			[1, 3],
-			[0, 2],
-			[1, 2]
-		],
+	// 	[
+	// 		[1, 3],
+	// 		[0, 2, 4],
+	// 		[1, 3],
+	// 		[0, 2],
+	// 		[1, 2]
+	// 	],
+
+		// [
+		// 	[1, 2],
+		// 	[0, 2],
+		// 	[0, 1],
+		// ],
+
+		// [
+		// 	[1],
+		// 	[0]
+		// ],
+
+		// [
+		// 	[1],
+		// 	[0, 2],
+		// 	[1, 3],
+		// 	[2, 4],
+		// 	[3]
+		// ],
+
+		// [
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// ],
+
+		// [
+		// 	[],
+		// 	[],
+		// 	[],
+		// ],
+
+		// [
+		// 	[1],
+		// 	[0, 2],
+		// 	[1, 3],
+		// 	[1, 2]
+		// ],
+
+		// [
+		// 	[1, 2],
+		// 	[0, 2],
+		// 	[1, 3, 0],
+		// 	[1, 2]
+		// ],
 
 		[
-			[1, 2],
-			[0, 2],
-			[0, 1],
+			[1, 2, 3, 4],
+			[0, 2, 3, 4],
+			[0, 1, 3, 4],
+			[0, 1, 2, 4],
+			[0, 1, 2, 3]
 		],
-
-		[
-			[1],
-			[0]
-		],
-
-		[
-			[1],
-			[0, 2],
-			[1, 3],
-			[2, 4],
-			[3]
-		]
 	];
 
 	const g = new GraphUi();
 	for (const graph of graphSamples) {
 		g.readAdjacencyList(graph);
 		g.drawGraph();		
-		await sleep(1500);
+		await sleep(3500);
 	}
 }
 main();
