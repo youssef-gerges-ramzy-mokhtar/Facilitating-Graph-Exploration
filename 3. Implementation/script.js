@@ -160,8 +160,6 @@ class GraphUi {
 			const edge = new EdgeUi(node, neighbourNode);
 			const edgeLength = edge.getEdgeLength();
 
-			print(edgeLength)
-
 			const force = this.k1 * (edgeLength - this.l);
 			fx += force * ((neighbourNode.x - node.x) / edgeLength);
 			fy += force * ((neighbourNode.y - node.y) / edgeLength);
@@ -198,7 +196,7 @@ class GraphUi {
 				node.setX(node.x + x);
 				node.setY(node.y + y);
 
-				await sleep(10);
+				await sleep(1);
 			}
 		}
 	}
@@ -232,13 +230,13 @@ class GraphUi {
 
 async function main() {
 	const graphSamples = [
-	// 	[
-	// 		[1, 3],
-	// 		[0, 2, 4],
-	// 		[1, 3],
-	// 		[0, 2],
-	// 		[1, 2]
-	// 	],
+		// [
+		// 	[1, 3],
+		// 	[0, 2, 4],
+		// 	[1, 3],
+		// 	[0, 2],
+		// 	[1, 2]
+		// ],
 
 		// [
 		// 	[1, 2],
@@ -287,12 +285,22 @@ async function main() {
 		// 	[1, 2]
 		// ],
 
+		// [
+		// 	[1, 2, 3, 4],
+		// 	[0, 2, 3, 4],
+		// 	[0, 1, 3, 4],
+		// 	[0, 1, 2, 4],
+		// 	[0, 1, 2, 3]
+		// ],
+	
 		[
-			[1, 2, 3, 4],
-			[0, 2, 3, 4],
-			[0, 1, 3, 4],
-			[0, 1, 2, 4],
-			[0, 1, 2, 3]
+			[1, 2],
+			[0, 3, 4],
+			[0, 5, 6],
+			[1],
+			[1],
+			[2],
+			[2]
 		],
 	];
 
@@ -300,7 +308,7 @@ async function main() {
 	for (const graph of graphSamples) {
 		g.readAdjacencyList(graph);
 		g.drawGraph();		
-		await sleep(3500);
+		await sleep(2500);
 	}
 }
 main();
