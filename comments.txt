@@ -12,6 +12,7 @@ Concerns:
 	- The code doesn't allow nodes to exist with no edges
 	- The code breaks when 2 nodes overlap
 	- The Graph Displaying Procedure takes a bit too long (Not big issue - Concurrent)
+	- The readEdgeList() doesn't seem clean & DRY
 
 Ideas:
 	- Put the code for handling user input in a separate module
