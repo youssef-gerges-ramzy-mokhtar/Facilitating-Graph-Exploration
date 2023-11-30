@@ -50,19 +50,48 @@ class EdgeUi {
 	}
 }
 
-export class GraphUi {
-	/*
-	Thoughts:
-		- Might want to remove the nodeToNum Mapper and the numToNode Mapper
-			[.] Reason can simply create the graphAdjList to map NodeUi objects to an array of NodeUi objects
-			[.] graphAdjList: Map<NodeUi, Array<NodeUi>>, this transformation will happen in the reading functions
-
-		- Might want to keep the graphAdjList without change to allow other code/algorithms that will need to deal with the graph 
-		  to have a standard view of the graph which is a simple Adjacency List Representation
-	*/
+class ObjectIdMapper {
 	constructor() {
-		this.nodeToNum = {};
-		this.numToNode = {};
+		this.objToId = new Map();
+		this.idToObj = new Map();
+	}
+
+	getId(obj, strObj = "") {
+		if (this.objToId.has(strObj))
+			return this.objToId.get(strObj);
+
+		const id = this.objToId.size;
+		this.objToId.set(strObj, id);
+		this.idToObj.set(id, obj);
+
+		return id;
+	}
+
+	getObj(id) {
+		if (!this.idToObj.has(id))
+			throw new Error(`Id ${id} Not Found`);
+
+		return this.idToObj.get(id);
+	}
+
+	idExist(id) {
+		return this.idToObj.has(id);
+	}
+
+	print() {
+		print("1 >>>", this.objToId);
+		print("2 >>>", this.idToObj);
+	}
+
+	clear() {
+		this.objToId.clear();
+		this.idToObj.clear();
+	}
+}
+
+export class GraphUi {
+	constructor() {
+		this.nodeMapper = new ObjectIdMapper();
 		this.graphAdjList = [];
 
 		this.k1 = 10;
@@ -75,20 +104,38 @@ export class GraphUi {
 	}
 
 	readAdjacencyList(adjList) {
-		this.graphAdjList = adjList;
-		this.#updateGraphMapping();
+		const edgeList = this.#convertAdjListToEdgeList(adjList);
+		this.readEdgeList(edgeList);
 	}
 
-	readEdgeList() {
-		// to implement later
+	// readEdgeList Code is not Clean & DRY
+	readEdgeList(edgeList, undirected = true) {
+		this.#resetGraph();
+
+		for (const edge of edgeList) {
+			const node1 = new Circle(undefined, undefined, undefined, undefined, edge[0], DRAWING_CANVAS, true);
+			const node2 = new Circle(undefined, undefined, undefined, undefined, edge[1], DRAWING_CANVAS, true);
+			
+			const from = this.nodeMapper.getId(node1, edge[0]);
+			const to = this.nodeMapper.getId(node2, edge[1]);
+
+			if (!this.graphAdjList[from])
+				this.graphAdjList[from] = new Set();
+			if (!this.graphAdjList[to])
+				this.graphAdjList[to] = new Set();
+
+			this.graphAdjList[from].add(to);
+			if (undirected)
+				this.graphAdjList[to].add(from);
+		}
 	}
 
 	calcForce(v) {
 		let fx = 0, fy = 0;
 
-		const node = this.numToNode[v];
+		const node = this.nodeMapper.getObj(v);
 		for (const neighbour of this.graphAdjList[v]) {
-			const neighbourNode = this.numToNode[neighbour];
+			const neighbourNode = this.nodeMapper.getObj(neighbour);
 			const edge = new EdgeUi(node, neighbourNode);
 			const edgeLength = edge.getEdgeLength();
 
@@ -101,7 +148,7 @@ export class GraphUi {
 			if (i == v)
 				continue;
 
-			const neighbourNode = this.numToNode[i];
+			const neighbourNode = this.nodeMapper.getObj(i);
 			const edge = new EdgeUi(node, neighbourNode);
 			const edgeLength = edge.getEdgeLength();
 
@@ -114,6 +161,7 @@ export class GraphUi {
 	}
 
 	async drawGraph() {
+		this.displayGraph();
 		let rate = 0.01;
 
 		for (let i = 0; i < 500; i++) {
@@ -124,7 +172,7 @@ export class GraphUi {
 				const x = rate*xForce;
 				const y = rate*yForce;
 
-				const node = this.numToNode[v];
+				const node = this.nodeMapper.getObj(v);
 				node.setX(node.x + x);
 				node.setY(node.y + y);
 
@@ -138,27 +186,32 @@ export class GraphUi {
 	displayGraph() {
 		clearCanvas(DRAWING_CANVAS);
 		for (let i = 0; i < this.graphAdjList.length; i++) {
-			const node = this.numToNode[i];
+			const node = this.nodeMapper.getObj(i);
 			node.display();
 		}
 
 		for (let node = 0; node < this.graphAdjList.length; node++) {
 			for (let neighbour of this.graphAdjList[node]) {
-				const fromNode = this.numToNode[node];
-				const toNode = this.numToNode[neighbour];
+				const fromNode = this.nodeMapper.getObj(node);
+				const toNode = this.nodeMapper.getObj(neighbour);
 				const edge = new EdgeUi(fromNode, toNode);
 				edge.display();
 			}
 		}
 	}
 
-	#updateGraphMapping() {
-		this.nodeToNum = this.numToNode = {};
-		for (let i = 0; i < this.graphAdjList.length; i++) {
-			const node = new Circle(undefined, undefined, undefined, undefined, i, DRAWING_CANVAS, true);
-			this.numToNode[i] = node;
-			this.nodeToNum[node] = i;
-		}
+	#resetGraph() {
+		this.graphAdjList = [];
+		this.nodeMapper.clear();
+	}
+
+	#convertAdjListToEdgeList(adjList) {
+		const edgeList = [];
+		for (const node in adjList)
+			for (const neighbour of adjList[node])
+				edgeList.push([node, neighbour.toString()]);
+
+		return edgeList;
 	}
 }
 
