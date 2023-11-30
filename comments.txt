@@ -1,8 +1,8 @@
 Agenda/Tasks:
 	- Implement the Wireframe
 	- Read more about Spring Embedder Algorithms from the Graph Visualization Book
-		. Terminate the Looping for Displaying the Graph if there are no major changes in the force on nodes 		  	  (You will need maybe to keep record of the forces of the pervious 3-5 iterations) 
-		. Handle the case when 2 nodes somehow overlap (this will divide by zero in your code which is OO), 		  	  so instead return a very very large value for the force eg. INT_MAX
+		. Terminate the Looping for Displaying the Graph if there are no major changes in the force on nodes (You will need maybe to keep record of the forces of the pervious 3-5 iterations) 
+		. Handle the case when 2 nodes somehow overlap (this will divide by zero in your code which is OO), so instead return a very very large value for the force eg. INT_MAX
 	
 	- Try to have a deeper understanding of how concurrency works when drawing a Graph
 	- MISC: Allow the user to move a Node around
@@ -34,7 +34,7 @@ Design Aspects:
 	- DRY (Don't repeat yourself)
 	- SOLID
 	- Decoupled system
-	- Accepting that the underlying structure of storage can change without changing the code (That violates 	  	  KISS & YAGNI)
+	- Accepting that the underlying structure of storage can change without changing the code (That violates KISS & YAGNI)
 	- Separate the user interface from the code logic (Model + View)
 		. optionally can have a entity in the middle between the Model & the View aka. "Controller"
 
