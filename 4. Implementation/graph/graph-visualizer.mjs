@@ -4,9 +4,10 @@ import {print, sleep} from ".././utils/utils.mjs";
 import {DRAWING_CANVAS, Circle, Line, clearCanvas} from ".././svg/svg.mjs";
 
 class EdgeUi {
-	constructor(from, to) {
+	constructor(from, to, directedEdge) {
 		this.from = from;
 		this.to = to;
+		this.directedEdge = directedEdge;
 	}
 
 	display() {
@@ -18,7 +19,7 @@ class EdgeUi {
 		const [fromX, fromY] = this.getCoords(x1, y1, x2, y2);
 		const [toX, toY] = this.getCoords(x2, y2, x1, y1);
 
-		new Line(fromX, fromY, toX, toY).display();
+		new Line(fromX, fromY, toX, toY, DRAWING_CANVAS, this.directedEdge).display();
 	}
 
 	getCoords(x1, y1, x2, y2) {
@@ -93,6 +94,7 @@ export class GraphUi {
 	constructor() {
 		this.nodeMapper = new ObjectIdMapper();
 		this.graphAdjList = [];
+		this.edgeList = [];
 
 		this.k1 = 10;
 		this.k2 = Math.pow(1500, 2);
@@ -109,7 +111,7 @@ export class GraphUi {
 	}
 
 	// readEdgeList Code is not Clean & DRY
-	readEdgeList(edgeList, undirected = true) {
+	readEdgeList(edgeList) {
 		this.#resetGraph();
 
 		for (const edge of edgeList) {
@@ -124,9 +126,12 @@ export class GraphUi {
 			if (!this.graphAdjList[to])
 				this.graphAdjList[to] = new Set();
 
+			// Updating Adjacency List
 			this.graphAdjList[from].add(to);
-			if (undirected)
-				this.graphAdjList[to].add(from);
+			this.graphAdjList[to].add(from);
+
+			// Updating Edge List
+			this.edgeList.push([from, to]);
 		}
 	}
 
@@ -160,13 +165,12 @@ export class GraphUi {
 		return [fx, fy];
 	}
 
-	async drawGraph() {
-		this.displayGraph();
+	async drawGraph(directed = false) {
 		let rate = 0.01;
 
 		for (let i = 0; i < 500; i++) {
 			for (let v = 0; v < this.graphAdjList.length; v++) {
-				this.displayGraph();
+				this.displayGraph(directed);
 
 				const [xForce, yForce] = this.calcForce(v);
 				const x = rate*xForce;
@@ -183,7 +187,7 @@ export class GraphUi {
 		}
 	}
 
-	displayGraph() {
+	displayGraph(directed = false) {		
 		clearCanvas(DRAWING_CANVAS);
 		for (let i = 0; i < this.graphAdjList.length; i++) {
 			const node = this.nodeMapper.getObj(i);
@@ -192,16 +196,31 @@ export class GraphUi {
 
 		for (let node = 0; node < this.graphAdjList.length; node++) {
 			for (let neighbour of this.graphAdjList[node]) {
+				const from = node;
+				const to = neighbour;
+
+				if (directed && !this.#edgeExist([from, to]))
+					continue;
+
 				const fromNode = this.nodeMapper.getObj(node);
 				const toNode = this.nodeMapper.getObj(neighbour);
-				const edge = new EdgeUi(fromNode, toNode);
+				const edge = new EdgeUi(fromNode, toNode, directed);
 				edge.display();
 			}
 		}
 	}
 
+	#edgeExist(graphEdge) {
+		for (const edge of this.edgeList)
+			if (edge[0] === graphEdge[0] && edge[1] === graphEdge[1])
+				return true;
+
+		return false;
+	}
+
 	#resetGraph() {
 		this.graphAdjList = [];
+		this.edgeList = [];
 		this.nodeMapper.clear();
 	}
 

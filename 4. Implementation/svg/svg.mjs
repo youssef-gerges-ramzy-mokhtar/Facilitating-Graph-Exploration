@@ -61,13 +61,14 @@ export class Circle {
 }
 
 export class Line {
-	constructor(x1, y1, x2, y2, drawingArea) {
+	constructor(x1, y1, x2, y2, drawingArea, hasArrow) {
 		const defaultOptions = {
 			x1: 0,
 			y1: 0,
 			x2: 0,
 			y2: 0,
-			drawingArea: DRAWING_CANVAS
+			drawingArea: DRAWING_CANVAS,
+			hasArrow: false
 		}
 
 		this.x1 = x1 ?? defaultOptions.x1;
@@ -75,10 +76,29 @@ export class Line {
 		this.x2 = x2 ?? defaultOptions.x2;
 		this.y2 = y2 ?? defaultOptions.y2;
 		this.drawingArea = drawingArea ?? defaultOptions.drawingArea;
+		this.hasArrow = hasArrow ?? defaultOptions.hasArrow;
 	}
 
 	display() {
-		const line = `<line x1="${this.x1}" y1="${this.y1}" x2="${this.x2}" y2="${this.y2}" stroke="black" stroke-width="2" />`
+		const arrow = `
+			<marker 
+				id="arrow" 
+				viewBox="0 0 10 10" 
+				refX="5" 
+				refY="5" 
+				markerWidth="5" 
+				markerHeight="6" 
+				orient="auto-start-reverse"> 
+				<path d="M 0 0 L 10 5 L 0 10 z" />
+	  		</marker>
+		`	
+		let line = `
+			<line x1="${this.x1}" y1="${this.y1}" x2="${this.x2}" y2="${this.y2}" stroke="black" stroke-width="2" marker-end="url(#arrow)"  />
+		`
+
+		if (this.hasArrow)
+			line = arrow + line;
+
 		addElementToSvg(line, this.drawingArea);
 	}
 }
