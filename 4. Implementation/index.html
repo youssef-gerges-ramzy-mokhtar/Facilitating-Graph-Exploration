@@ -14,33 +14,36 @@
 	</header>
 
 	<div id="graph-area">
-		<div>
+		<div id="left-graph-area">
 			<div id="options">
-				<h3>Options</h3>
-				<select id="graph-type" name="Graph-Type">
-					<option selected disabled>Graph Type</option>
-					<option value="undirected">Undirected</option>
-					<option value="directed">Directed</option>
-				</select>
+				<div id="options-title">Options</div>
 
-				<select name="Visualization-Algorithm">
-					<option selected disabled>Visualization</option>
-					<option>None</option>
-					<option>Depth-First Search</option>
-					<option>Breadth-First Search</option>
-					<option>Dijkstra's Algorithm</option>
-				</select>
+				<div id="select-options">
+					<select id="graph-type" name="Graph-Type">
+						<option selected disabled>Graph Type</option>
+						<option value="undirected">Undirected</option>
+						<option value="directed">Directed</option>
+					</select>
+
+					<select name="Visualization-Algorithm">
+						<option selected disabled>Visualization</option>
+						<option>None</option>
+						<option>Depth-First Search</option>
+						<option>Breadth-First Search</option>
+						<option>Dijkstra's Algorithm</option>
+					</select>
+				</div>
 			</div>
 
 			<div id="graph-input">
-				<p>Graph Data</p>
+				<div>Graph Data</div>
 				<textarea id="graph-data"></textarea>
 			</div>
 		</div>
 		
 		<div id="drawing-area">
 			<svg id="graph_canvas" xmlns="http://www.w3.org/2000/svg">
-				<rect width="100%" height="100%" style="fill:rgb(255,255,255);stroke-width:10;stroke:rgb(0,0,0)"/>
+				<rect width="100%" height="100%" style="fill:rgb(255,255,255);stroke-width:4;stroke:rgb(0,0,0)"/>
 			</svg>
 		</div>
 	</div>

@@ -54,12 +54,11 @@ function generateEdge(row) {
 	return [];
 }
 
-async function main() {
-	for (const graph of graphSamples) {
-		print(graph)
-		g.readAdjacencyList(graph);
-		g.drawGraph();
-		await sleep(5000);
-	}
-}
-main();
+// async function main() {
+// 	for (const graph of graphSamples) {
+// 		g.readAdjacencyList(graph);
+// 		g.drawGraph();
+// 		await sleep(5000);
+// 	}
+// }
+// main();

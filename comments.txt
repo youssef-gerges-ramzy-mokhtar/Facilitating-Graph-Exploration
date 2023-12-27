@@ -7,9 +7,10 @@ Agenda/Tasks:
 	- MISC: Allow the user to move a Node around
 	- MISC: Allow the user to resize the Drawing Area
 
-Concerns:
+High-Priority Concerns:
 	- The code breaks when 2 nodes overlap
-	- The code breaks when the graph have self-loops
+
+Normal Concerns:
 	- The Graph Displaying Procedure takes a bit too long (Not big issue - Concurrent)
 	- When adding a new edge to the graph all the graph nodes are re-rendered and all the existing nodes have new random positions instead try to maintain the old graph positions
 
@@ -36,4 +37,3 @@ Design Aspects:
 	- Accepting that the underlying structure of storage can change without changing the code (That violates KISS & YAGNI)
 	- Separate the user interface from the code logic (Model + View)
 		. optionally can have a entity in the middle between the Model & the View aka. "Controller"
-

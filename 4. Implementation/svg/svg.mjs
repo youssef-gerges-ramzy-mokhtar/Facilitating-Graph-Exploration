@@ -3,7 +3,7 @@ export const DRAWING_CANVAS = document.getElementById("graph_canvas");
 
 export class Circle {
 	constructor(x, y, col, radius, content, drawingArea, randomPoint) {
-		const defaultOptions = {
+		this.defaultOptions = {
 			x: 0,
 			y: 0,
 			col: "white",
@@ -12,12 +12,12 @@ export class Circle {
 			drawingArea: DRAWING_CANVAS,
 		};
 
-		this.x = x ?? defaultOptions.x;
-		this.y = y ?? defaultOptions.y;
-		this.col = col ?? defaultOptions.col;
-		this.radius = radius ?? defaultOptions.radius;
-		this.content = content ?? defaultOptions.content;
-		this.drawingArea = drawingArea ?? defaultOptions.drawingArea;
+		this.x = x ?? this.defaultOptions.x;
+		this.y = y ?? this.defaultOptions.y;
+		this.col = col ?? this.defaultOptions.col;
+		this.radius = radius ?? this.defaultOptions.radius;
+		this.content = content ?? this.defaultOptions.content;
+		this.drawingArea = drawingArea ?? this.defaultOptions.drawingArea;
 	
 		if (randomPoint)
 			[this.x, this.y] = this.#randomCoords();
@@ -40,6 +40,10 @@ export class Circle {
 	setY(y) {
 		const drawAreaHeight = this.drawingArea.height.baseVal.value;
 		this.y = this.#validatePos(y, drawAreaHeight - this.radius);
+	}
+
+	setColor(col) {
+		this.col = col ?? this.defaultOptions.col;
 	}
 
 	#validatePos(pos, maxRange) {
@@ -106,7 +110,7 @@ export class Line {
 export function clearCanvas(svg, width, height) {
 	const svgWidth = width ?? svg.width.baseVal.value;
 	const svgHeight = height ?? svg.height.baseVal.value;
-	svg.innerHTML = `<rect width=${svgWidth} height=${svgHeight} style='fill:rgb(255,255,255);stroke-width:10;stroke:rgb(0,0,0)'/>`;
+	svg.innerHTML = `<rect width=${svgWidth} height=${svgHeight} style='fill:rgb(255,255,255);stroke-width:4;stroke:rgb(0,0,0)'/>`;
 }
 
 function addElementToSvg(element, svg) {
