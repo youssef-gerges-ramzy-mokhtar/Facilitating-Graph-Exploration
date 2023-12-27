@@ -1,6 +1,4 @@
-export function print(anything, ...rest) {
-	console.log(anything, ...rest);
-}
+export const print = console.log.bind(window.console);
 
 export function sleep(delay) {
 	return new Promise((resolve) => setTimeout(resolve, delay));

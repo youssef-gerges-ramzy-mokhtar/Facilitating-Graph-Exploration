@@ -99,6 +99,8 @@ export class GraphUi {
 		this.k1 = 10;
 		this.k2 = Math.pow(1500, 2);
 		this.l = 130;
+
+		this.isDirected = false;
 	}
 
 	readAdjacencyMatrix(adjMatrix) {
@@ -165,12 +167,13 @@ export class GraphUi {
 		return [fx, fy];
 	}
 
-	async drawGraph(directed = false) {
+	async drawGraph() {
+		this.displayGraph();
 		let rate = 0.01;
 
-		for (let i = 0; i < 500; i++) {
+		for (let i = 0; i < 250; i++) {
 			for (let v = 0; v < this.graphAdjList.length; v++) {
-				this.displayGraph(directed);
+				this.displayGraph();
 
 				const [xForce, yForce] = this.calcForce(v);
 				const x = rate*xForce;
@@ -181,13 +184,11 @@ export class GraphUi {
 				node.setY(node.y + y);
 
 				await sleep(1);
-				if (i%1000 == 0)
-					print(this.graphAdjList.length, i) // that is werid behavior try to understand how this concurrency Works in JavaScript
 			}
 		}
 	}
 
-	displayGraph(directed = false) {		
+	displayGraph() {		
 		clearCanvas(DRAWING_CANVAS);
 		for (let i = 0; i < this.graphAdjList.length; i++) {
 			const node = this.nodeMapper.getObj(i);
@@ -199,15 +200,20 @@ export class GraphUi {
 				const from = node;
 				const to = neighbour;
 
-				if (directed && !this.#edgeExist([from, to]))
+				if (this.isDirected && !this.#edgeExist([from, to]))
 					continue;
 
 				const fromNode = this.nodeMapper.getObj(node);
 				const toNode = this.nodeMapper.getObj(neighbour);
-				const edge = new EdgeUi(fromNode, toNode, directed);
+				const edge = new EdgeUi(fromNode, toNode, this.isDirected);
 				edge.display();
 			}
 		}
+	}
+
+	setDirected(isDirected) {
+		this.isDirected = isDirected;
+		this.displayGraph()
 	}
 
 	#edgeExist(graphEdge) {
