@@ -114,6 +114,9 @@ class Graph {
 	}
 
 	addNode(node) {
+		if (typeof node !== "number")
+			throw new Error("Invalid Arguments Number Expected");
+
 		this.nodes.add(node);
 	}
 
@@ -149,6 +152,14 @@ class Graph {
 		return adjList;
 	}
 
+	getEdgeList() {
+		return this.edgeList;
+	}
+
+	getNodes() {
+		return new Set(this.nodes);
+	}
+
 	clear() {
 		this.edgeList = [];
 		this.nodes.clear();
@@ -166,29 +177,34 @@ class Graph {
 export class GraphUi {
 	constructor() {
 		this.nodeMapper = new ObjectIdMapper();
-		this.undirectedAdjList = [];
-		this.directedAdjList = [];
 		this.graph = new Graph();
+		this.isDirected = false;
 
 		this.k1 = 10;
 		this.k2 = Math.pow(1500, 2);
 		this.l = 130;
-
-		this.isDirected = false;
 	}
 
 	readAdjacencyMatrix(adjMatrix) {
-		// to implement later
+		this.graph.clear();
+		this.graph.readAdjacencyMatrix(adjMatrix);
+		this.readEdgeList(this.graph.getEdgeList(), this.graph.getNodes());
 	}
 
 	readAdjacencyList(adjList) {
-		const edgeList = this.#convertAdjListToEdgeList(adjList);
-		this.readEdgeList(edgeList);
+		this.graph.clear();
+		this.graph.readAdjacencyList(adjList);
+		this.readEdgeList(this.graph.getEdgeList(), this.graph.getNodes());
 	}
 
-	// readEdgeList Code is not Clean & DRY
-	readEdgeList(edgeList) {
+	readEdgeList(edgeList, nodes = []) {
 		this.#resetGraph();
+
+		for (const node of nodes) {
+			const nodeCircle = new Circle(undefined, undefined, undefined, undefined, node, DRAWING_CANVAS, true);
+			const nodeId = this.nodeMapper.getId(nodeCircle, node);
+			this.graph.addNode(nodeId);
+		}
 
 		for (const edge of edgeList) {
 			const node1 = new Circle(undefined, undefined, undefined, undefined, edge[0], DRAWING_CANVAS, true);
@@ -199,50 +215,19 @@ export class GraphUi {
 
 			this.graph.addEdge(from, to);
 		}
-
-		this.undirectedAdjList = this.graph.getUndirectedAdjList();
-		this.directedAdjList = this.graph.getDirectedAdjList();
-	}
-
-	calcForce(v) {
-		let fx = 0, fy = 0;
-
-		const node = this.nodeMapper.getObj(v);
-		for (const neighbour of this.undirectedAdjList[v]) {
-			const neighbourNode = this.nodeMapper.getObj(neighbour);
-			const edge = new EdgeUi(node, neighbourNode);
-			const edgeLength = edge.getEdgeLength();
-
-			const force = this.k1 * (edgeLength - this.l);
-			fx += force * ((neighbourNode.x - node.x) / edgeLength);
-			fy += force * ((neighbourNode.y - node.y) / edgeLength);
-		}
-
-		for (let i = 0; i < this.undirectedAdjList.length; i++) {
-			if (i == v)
-				continue;
-
-			const neighbourNode = this.nodeMapper.getObj(i);
-			const edge = new EdgeUi(node, neighbourNode);
-			const edgeLength = edge.getEdgeLength();
-
-			const force = this.k2 / Math.pow(edgeLength, 2);
-			fx += force * ((node.x - neighbourNode.x) / edgeLength);
-			fy += force * ((node.y - neighbourNode.y) / edgeLength);
-		}
-
-		return [fx, fy];
 	}
 
 	async drawGraph() {
+		const undirectedAdjList = this.graph.getUndirectedAdjList();
+		
 		this.displayGraph();
 		let rate = 0.01;
 
 		for (let i = 0; i < 250; i++) {
-			for (let v = 0; v < this.undirectedAdjList.length; v++) {
+			for (let v = 0; v < undirectedAdjList.length; v++) {
 				this.displayGraph();
 
-				const [xForce, yForce] = this.calcForce(v);
+				const [xForce, yForce] = this.#calcForce(v);
 				const x = rate*xForce;
 				const y = rate*yForce;
 
@@ -257,7 +242,7 @@ export class GraphUi {
 
 	displayGraph() {		
 		clearCanvas(DRAWING_CANVAS);
-		const adjList = this.isDirected ? this.directedAdjList : this.undirectedAdjList;
+		const adjList = this.isDirected ? this.graph.getDirectedAdjList() : this.graph.getUndirectedAdjList();
 
 		for (let i = 0; i < adjList.length; i++) {
 			const node = this.nodeMapper.getObj(i);
@@ -282,9 +267,38 @@ export class GraphUi {
 		this.displayGraph()
 	}
 
+	#calcForce(v) {
+		const undirectedAdjList = this.graph.getUndirectedAdjList();
+		let fx = 0, fy = 0;
+
+		const node = this.nodeMapper.getObj(v);
+		for (const neighbour of undirectedAdjList[v]) {
+			const neighbourNode = this.nodeMapper.getObj(neighbour);
+			const edge = new EdgeUi(node, neighbourNode);
+			const edgeLength = edge.getEdgeLength();
+
+			const force = this.k1 * (edgeLength - this.l);
+			fx += force * ((neighbourNode.x - node.x) / edgeLength);
+			fy += force * ((neighbourNode.y - node.y) / edgeLength);
+		}
+
+		for (let i = 0; i < undirectedAdjList.length; i++) {
+			if (i == v)
+				continue;
+
+			const neighbourNode = this.nodeMapper.getObj(i);
+			const edge = new EdgeUi(node, neighbourNode);
+			const edgeLength = edge.getEdgeLength();
+
+			const force = this.k2 / Math.pow(edgeLength, 2);
+			fx += force * ((node.x - neighbourNode.x) / edgeLength);
+			fy += force * ((node.y - neighbourNode.y) / edgeLength);
+		}
+
+		return [fx, fy];
+	}
+
 	#resetGraph() {
-		this.undirectedAdjList = [];
-		this.directedAdjList = [];
 		this.nodeMapper.clear();
 		this.graph.clear();
 	}

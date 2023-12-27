@@ -1,5 +1,4 @@
 Agenda/Tasks:
-	- Allow representing Directed Graphs
 	- Implement the Wireframe
 	- Read more about Spring Embedder Algorithms from the Graph Visualization Book
 		. Terminate the Looping for Displaying the Graph if there are no major changes in the force on nodes (You will need maybe to keep record of the forces of the pervious 3-5 iterations) 
@@ -9,17 +8,13 @@ Agenda/Tasks:
 	- MISC: Allow the user to resize the Drawing Area
 
 Concerns:
-	- The code doesn't allow nodes to exist with no edges
 	- The code breaks when 2 nodes overlap
 	- The code breaks when the graph have self-loops
 	- The Graph Displaying Procedure takes a bit too long (Not big issue - Concurrent)
-	- The readEdgeList() doesn't seem clean & DRY
 	- When adding a new edge to the graph all the graph nodes are re-rendered and all the existing nodes have new random positions instead try to maintain the old graph positions
 
 Ideas:
 	- Put the code for handling user input in a separate module
-
-Design Aspects:
 	- Submodule for Graph Algorithm Visualizers
 	- Think of having the following class in your code
 		. Try to challenge this design choice (at the end you are always referencing one reference)
@@ -30,8 +25,7 @@ Design Aspects:
 			}
 		}
 
-	- Think of having a separate class to represent a graph
-
+Design Aspects:
 	- Code Speed
 	- Code Structure ease of understanding
 	- Keep it Stupid Simple (KISS)
