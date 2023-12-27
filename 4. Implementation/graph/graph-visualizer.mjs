@@ -124,7 +124,9 @@ class Graph {
 		if (typeof from !== "number" || typeof to !== "number")
 			throw new Error("Invalid Arguments Number Expected");
 
-		this.edgeList.push([from, to]); // in the future you might want to check if this edge already exists (to prevent multi-edges)
+		if (from !== to) // not a self-loop edge
+			this.edgeList.push([from, to]); // in the future you might want to check if this edge already exists (to prevent multi-edges)
+
 		this.addNode(from);
 		this.addNode(to);
 	}
@@ -265,6 +267,14 @@ export class GraphUi {
 	setDirected(isDirected) {
 		this.isDirected = isDirected;
 		this.displayGraph()
+	}
+
+	getCircle(nodeId) {
+		return this.nodeMapper.getObj(nodeId);
+	}
+
+	getGraph() {
+		return this.graph;
 	}
 
 	#calcForce(v) {
