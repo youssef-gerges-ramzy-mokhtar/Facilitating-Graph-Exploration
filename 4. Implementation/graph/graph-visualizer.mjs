@@ -3,23 +3,17 @@
 import {print, sleep} from ".././utils/utils.mjs";
 import {DRAWING_CANVAS, Circle, Line, clearCanvas} from ".././svg/svg.mjs";
 
-class EdgeUi {
+export class EdgeUi {
 	constructor(from, to, directedEdge) {
 		this.from = from;
 		this.to = to;
 		this.directedEdge = directedEdge;
+
+		this.#initLine();
 	}
 
 	display() {
-		const x1 = this.from.x;
-		const y1 = this.from.y;
-		const x2 = this.to.x;
-		const y2 = this.to.y;
-		
-		const [fromX, fromY] = this.getCoords(x1, y1, x2, y2);
-		const [toX, toY] = this.getCoords(x2, y2, x1, y1);
-
-		new Line(fromX, fromY, toX, toY, DRAWING_CANVAS, this.directedEdge).display();
+		this.line.display();
 	}
 
 	getCoords(x1, y1, x2, y2) {
@@ -48,6 +42,22 @@ class EdgeUi {
 
 	getEdgeLength() {
 		return Math.sqrt(Math.pow(this.from.x - this.to.x, 2) + Math.pow(this.from.y - this.to.y, 2));
+	}
+
+	getLine() {
+		return this.line;
+	}
+
+	#initLine() {
+		const x1 = this.from.x;
+		const y1 = this.from.y;
+		const x2 = this.to.x;
+		const y2 = this.to.y;
+		
+		const [fromX, fromY] = this.getCoords(x1, y1, x2, y2);
+		const [toX, toY] = this.getCoords(x2, y2, x1, y1);
+
+		this.line = new Line(fromX, fromY, toX, toY, DRAWING_CANVAS, this.directedEdge);
 	}
 }
 
@@ -185,6 +195,8 @@ export class GraphUi {
 		this.k1 = 10;
 		this.k2 = Math.pow(1500, 2);
 		this.l = 130;
+
+		this.drawingStopped = false;
 	}
 
 	readAdjacencyMatrix(adjMatrix) {
@@ -227,6 +239,9 @@ export class GraphUi {
 
 		for (let i = 0; i < 250; i++) {
 			for (let v = 0; v < undirectedAdjList.length; v++) {
+				if (this.drawingStopped)
+					return;
+
 				this.displayGraph();
 
 				const [xForce, yForce] = this.#calcForce(v);
@@ -242,7 +257,7 @@ export class GraphUi {
 		}
 	}
 
-	displayGraph() {		
+	displayGraph() {
 		clearCanvas(DRAWING_CANVAS);
 		const adjList = this.isDirected ? this.graph.getDirectedAdjList() : this.graph.getUndirectedAdjList();
 
@@ -273,8 +288,20 @@ export class GraphUi {
 		return this.nodeMapper.getObj(nodeId);
 	}
 
+	getEdge(fromId, toId) {
+
+	}
+
 	getGraph() {
 		return this.graph;
+	}
+
+	stopDrawing() {
+		this.drawingStopped = true;
+	}
+
+	enableDrawing() {
+		this.drawingStopped = false;
 	}
 
 	#calcForce(v) {

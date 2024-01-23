@@ -71,6 +71,8 @@ export class Line {
 			y1: 0,
 			x2: 0,
 			y2: 0,
+			strokeWidth: 2,
+			strokeCol: "black",
 			drawingArea: DRAWING_CANVAS,
 			hasArrow: false
 		}
@@ -81,6 +83,17 @@ export class Line {
 		this.y2 = y2 ?? defaultOptions.y2;
 		this.drawingArea = drawingArea ?? defaultOptions.drawingArea;
 		this.hasArrow = hasArrow ?? defaultOptions.hasArrow;
+		
+		this.strokeWidth = defaultOptions.strokeWidth;
+		this.strokeCol = defaultOptions.strokeCol;
+	}
+
+	setStrokeWidth(strokeWidth) {
+		this.strokeWidth = strokeWidth;
+	}
+
+	setStrokeCol(strokeCol) {
+		this.strokeCol = strokeCol;
 	}
 
 	display() {
@@ -97,7 +110,7 @@ export class Line {
 	  		</marker>
 		`	
 		let line = `
-			<line x1="${this.x1}" y1="${this.y1}" x2="${this.x2}" y2="${this.y2}" stroke="black" stroke-width="2" marker-end="url(#arrow)"  />
+			<line x1="${this.x1}" y1="${this.y1}" x2="${this.x2}" y2="${this.y2}" stroke="${this.strokeCol}" stroke-width="${this.strokeWidth}" marker-end="url(#arrow)"  />
 		`
 
 		if (this.hasArrow)
