@@ -9,10 +9,12 @@ export class EdgeUi {
 		this.to = to;
 		this.directedEdge = directedEdge;
 
+		this.line = new Line(0, 0, 0, 0, DRAWING_CANVAS);
 		this.#initLine();
 	}
 
 	display() {
+		this.#initLine();
 		this.line.display();
 	}
 
@@ -48,6 +50,11 @@ export class EdgeUi {
 		return this.line;
 	}
 
+	setDirected(directedEdge) {
+		this.directedEdge = directedEdge;
+		this.#initLine();
+	}
+
 	#initLine() {
 		const x1 = this.from.x;
 		const y1 = this.from.y;
@@ -57,7 +64,8 @@ export class EdgeUi {
 		const [fromX, fromY] = this.getCoords(x1, y1, x2, y2);
 		const [toX, toY] = this.getCoords(x2, y2, x1, y1);
 
-		this.line = new Line(fromX, fromY, toX, toY, DRAWING_CANVAS, this.directedEdge);
+		this.line.setCoords(fromX, fromY, toX, toY);
+		this.line.setHasArrow(this.directedEdge);
 	}
 }
 
@@ -197,6 +205,8 @@ export class GraphUi {
 		this.l = 130;
 
 		this.drawingStopped = false;
+
+		this.edgesUI = [];
 	}
 
 	readAdjacencyMatrix(adjMatrix) {
@@ -221,14 +231,19 @@ export class GraphUi {
 		}
 
 		for (const edge of edgeList) {
-			const node1 = new Circle(undefined, undefined, undefined, undefined, edge[0], DRAWING_CANVAS, true);
-			const node2 = new Circle(undefined, undefined, undefined, undefined, edge[1], DRAWING_CANVAS, true);
-			
-			const from = this.nodeMapper.getId(node1, edge[0]);
-			const to = this.nodeMapper.getId(node2, edge[1]);
+			const fromNodeCircle = new Circle(undefined, undefined, undefined, undefined, edge[0], DRAWING_CANVAS, true);
+			const toNodeCircle = new Circle(undefined, undefined, undefined, undefined, edge[1], DRAWING_CANVAS, true);
 
-			this.graph.addEdge(from, to);
+			const fromNodeId = this.nodeMapper.getId(fromNodeCircle, edge[0]);
+			const toNodeId = this.nodeMapper.getId(toNodeCircle, edge[1]);
+
+			this.graph.addEdge(fromNodeId, toNodeId);
 		}
+
+		for (const edge of this.graph.getEdgeList())
+			this.edgesUI.push(
+				new EdgeUi(this.nodeMapper.getObj(edge[0]), this.nodeMapper.getObj(edge[1]), this.isDirected)
+			); 
 	}
 
 	async drawGraph() {
@@ -259,29 +274,20 @@ export class GraphUi {
 
 	displayGraph() {
 		clearCanvas(DRAWING_CANVAS);
-		const adjList = this.isDirected ? this.graph.getDirectedAdjList() : this.graph.getUndirectedAdjList();
 
-		for (let i = 0; i < adjList.length; i++) {
-			const node = this.nodeMapper.getObj(i);
-			node.display();
-		}
+		const nodes = this.graph.getNodes();
+		for (const node of nodes)
+			this.nodeMapper.getObj(node).display();
 
-		for (let node = 0; node < adjList.length; node++) {
-			for (let neighbour of adjList[node]) {
-				const from = node;
-				const to = neighbour;
-
-				const fromNode = this.nodeMapper.getObj(node);
-				const toNode = this.nodeMapper.getObj(neighbour);
-				const edge = new EdgeUi(fromNode, toNode, this.isDirected);
-				edge.display();
-			}
-		}
+		for (const edgeUi of this.edgesUI)
+			edgeUi.display();
 	}
 
 	setDirected(isDirected) {
 		this.isDirected = isDirected;
-		this.displayGraph()
+		for (const edgeUi of this.edgesUI)
+			edgeUi.setDirected(isDirected);
+		this.displayGraph();
 	}
 
 	getCircle(nodeId) {
@@ -289,7 +295,12 @@ export class GraphUi {
 	}
 
 	getEdge(fromId, toId) {
+		const fromNodeCircle = this.nodeMapper.getObj(fromId);
+		const toNodeCircle = this.nodeMapper.getObj(toId);
 
+		for (const edgeUi of this.edgesUI)
+			if (edgeUi.from == fromNodeCircle && edgeUi.to == toNodeCircle)
+				return edgeUi;
 	}
 
 	getGraph() {
@@ -338,6 +349,7 @@ export class GraphUi {
 	#resetGraph() {
 		this.nodeMapper.clear();
 		this.graph.clear();
+		this.edgesUI = [];
 	}
 
 	#convertAdjListToEdgeList(adjList) {

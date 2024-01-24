@@ -57,28 +57,22 @@ function generateEdge(row) {
 
 /* Initial Code to Visualize BFS (alot of problems in the code)
 	. Code is not Clean & DRY
-	. Big Problem Edges in the GraphUI Have to be stored
-		- The Visulization should work even if we have not stopped the drawing
 	. Choose better colors for the visualization process
 	. Visualizing BFS in an undirected GRAPH results in an unatural visualization (see about that)
 		- the reason for not having an unatural visualization is that you store edges in reverse directions
 		- some how you need to convert it to a dummy directed graph to simulate a natural visualization
 	. You should provide more methods in the Line Class to be able to customize how the line is displayed
+*/
 
 async function visualize_playing() {
-	// const graph = graphSamples[0];
 	const graph = [
 		[1, 4],
 		[3],
 		[4],
 		[4, 2]
 	];
-	print(graph)
 	g.readAdjacencyList(graph)
 	g.drawGraph()
-
-	// await sleep(3000); // bad solution
-	// g.stopDrawing();
 
 	// BFS
 	const start = 0
@@ -86,60 +80,49 @@ async function visualize_playing() {
 	const vis = new Set();
 	vis.add(0);
 
-	const undirectedGraph = g.getGraph().getDirectedAdjList();
-
+	const diGraph = g.getGraph().getDirectedAdjList();
 	for (let sz = q.length; q.length !== 0; sz = q.length) {
 		while (sz--) {
 			const nodeId = q[0];
 			q.shift();
 
 			const curNode = g.getCircle(nodeId);
-			curNode.setColor("blue");
-			curNode.display();
+			curNode.setColor("lightBlue");
+			g.displayGraph();
 			await sleep(1500);
 
-			for (const neighbour of undirectedGraph[nodeId]) {
+			for (const neighbour of diGraph[nodeId]) {
 				const neighbourNode = g.getCircle(neighbour);
 				
-				const edge = new EdgeUi(curNode, neighbourNode);
-				print(edge)
+				const edge = g.getEdge(nodeId, neighbour);
 				edge.getLine().setStrokeCol("cyan");
-				edge.display();
+				g.displayGraph();
 				await sleep(1000);
 
 				if (!vis.has(neighbour)) {
 					q.push(neighbour);
 					vis.add(neighbour);
 
-					print(neighbour)
 					neighbourNode.setColor("yellow");
 					neighbourNode.display();
 					await sleep(1000);
 
 					edge.getLine().setStrokeWidth(4);
-					edge.getLine().setStrokeCol("black");
-					edge.display();
-					await sleep(1000);
-
-					// g.drawGraph();
-				} else {
-					edge.getLine().setStrokeCol("black");
+				} else
 					edge.getLine().setStrokeWidth(2);
-					edge.display();
-					await sleep(1000);
-				}
+
+				edge.getLine().setStrokeCol("black");
+				g.displayGraph();
+				await sleep(1000);
 			}
 			
-			curNode.setColor("green");
-			curNode.display();
+			curNode.setColor("lightGreen");
+			g.displayGraph();
 			await sleep(1000);
-
-			break;
 		}
 	}
 }
 visualize_playing();
-*/
 
 // async function main() {
 // 	for (const graph of graphSamples) {
