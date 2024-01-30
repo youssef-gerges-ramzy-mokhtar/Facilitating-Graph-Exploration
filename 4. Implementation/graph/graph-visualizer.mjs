@@ -97,6 +97,10 @@ class ObjectIdMapper {
 		return this.idToObj.has(id);
 	}
 
+	objExist(strObj) {
+		return this.objToId.has(strObj);
+	}
+
 	print() {
 		print("1 >>>", this.objToId);
 		print("2 >>>", this.idToObj);
@@ -292,6 +296,13 @@ export class GraphUi {
 
 	getCircle(nodeId) {
 		return this.nodeMapper.getObj(nodeId);
+	}
+
+	getCircleId(nodeText) {
+		if (!this.nodeMapper.objExist(nodeText))
+			return null;
+
+		return this.nodeMapper.getId(null, nodeText);
 	}
 
 	getEdge(fromId, toId) {

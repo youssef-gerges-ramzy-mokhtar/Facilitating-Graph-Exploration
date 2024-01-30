@@ -54,6 +54,22 @@ function generateEdge(row) {
 	return [];
 }
 
+// Develop a function that is able to read the node string and convert it to the corresponding node_id
+// if this string doesn't exist in the graph for any reason for example due to an update in the Graph, then an exception is thrown
+document.getElementById("drawing-area").addEventListener("click", function (event) {
+	let textEl = event.target;
+	if (event.target.tagName == "circle")
+		textEl = event.target.nextElementSibling;
+
+	if (textEl.tagName != "text")
+		return;
+
+	const text = textEl.textContent;
+	const nodeId = g.getCircleId(text)
+
+	// if (nodeId !== null)
+		// visualize_playing(nodeId);
+})
 
 /* Initial Code to Visualize BFS (alot of problems in the code)
 	. Code is not Clean & DRY
@@ -62,23 +78,17 @@ function generateEdge(row) {
 		- the reason for not having an unatural visualization is that you store edges in reverse directions
 		- some how you need to convert it to a dummy directed graph to simulate a natural visualization
 	. You should provide more methods in the Line Class to be able to customize how the line is displayed
-*/
 
-async function visualize_playing() {
-	const graph = [
-		[1, 4],
-		[3],
-		[4],
-		[4, 2]
-	];
-	g.readAdjacencyList(graph)
+async function visualize_playing(id) {
+	// BFS
 	g.drawGraph()
 
-	// BFS
-	const start = 0
-	const q = [start];
+	const q = [];
 	const vis = new Set();
-	vis.add(0);
+
+	const start = id
+	q.push(start);
+	vis.add(start);
 
 	const diGraph = g.getGraph().getDirectedAdjList();
 	for (let sz = q.length; q.length !== 0; sz = q.length) {
@@ -122,7 +132,9 @@ async function visualize_playing() {
 		}
 	}
 }
-visualize_playing();
+
+// visualize_playing();
+*/
 
 // async function main() {
 // 	for (const graph of graphSamples) {

@@ -1,0 +1,57 @@
+1. In the report you should go a bit in depth in the following:
+	. Briefly describe how async/await works and how does await sleep() works in the context of an async function
+	. State what is the effect on the performance if we make many calls to the async function
+		[.] Also is using async function improves performance
+	. Describe the technique used to allow only for a single async function to run at a time and to cancel all the previous async functions (using a global flag something that is like a lock), and we don't need to ensure tempring with the boolean flag as javascript is single threaded
+		// example code to demonstrate this idea
+		let cnt = 1
+		let cur = {
+			newCall: false,
+			id: cnt
+		}
+
+		async function trial(id) {
+			print("We are in the new one");
+			cur.newCall = true;
+			const me = {newCall: false, id: ++cnt}
+			cur = me;
+
+			const arr = [];
+			fill_arr(arr, id);
+
+			for (const el of arr) {
+				if (me.newCall) {
+					print("we entered here")
+					return;
+				}
+
+				print(`Array Length ${arr.length}`, el)
+				await sleep(1000);
+				print("after the sleep fid: ", me.id)
+			}
+
+			if (me.newCall)
+				return;
+			print("========");
+		}
+
+		function fill_arr(arr, id) {
+			for (let i = id; i <= 6; i++)
+				arr.push(i);
+		}
+	. Also describe how 2 async functions can execute in parallel in javascript while it is single-threaded?
+		- at the moment that is a bit mestrious for me, as both the displayGraph() function and the bfsVisualizer() function both run at parallel with no problems although both are async functions
+		- and what about synchronous lines of code inside async functions
+		- All this should be answered in detail and with deep understanding
+
+Links:
+	- https://medium.com/@Rahulx1/understanding-event-loop-call-stack-event-job-queue-in-javascript-63dcd2c71ecd
+	- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Event_loop#runtime_concepts
+	- https://stackoverflow.com/questions/40880416/what-is-the-difference-between-event-loop-queue-and-job-queue#:~:text=If%20there%20is%20any%20task,loop%20checks%20the%20task%20queue.
+	- https://www.youtube.com/watch?v=8aGhZQkoFbQ&t=444s
+	- https://stackoverflow.com/questions/36233028/how-does-multi-threading-or-async-code-in-javascript-work
+	- https://www.quora.com/If-JavaScript-is-single-threaded-how-can-some-tasks-run-in-parallel
+	- https://stackoverflow.com/questions/35612428/call-async-await-functions-in-parallel#:~:text=You%20can%20call%20multiple%20asynchronous,()%20and%20process%20the%20results.
+
+
+=====================
