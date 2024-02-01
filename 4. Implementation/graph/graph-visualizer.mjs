@@ -212,7 +212,6 @@ export class GraphUi {
 		this.k2 = Math.pow(1500, 2);
 		this.l = 130;
 
-		this.drawingStopped = false;
 		this.edgesUI = [];
 		this.singleAsync = new SingleAsync();
 	}
@@ -256,18 +255,13 @@ export class GraphUi {
 
 	async drawGraph() {
 		const functionLock = this.singleAsync.makeNewCall();
-
 		const undirectedAdjList = this.graph.getUndirectedAdjList();
-		
-		this.displayGraph();
-		let rate = 0.01;
+		const rate = 0.01;
 
+		this.displayGraph();
 		for (let i = 0; i < 250; i++) {
 			for (let v = 0; v < undirectedAdjList.length; v++) {
-				if (this.drawingStopped)
-					return;
-
-				if (functionLock.callStopped())
+				if (functionLock.callStopped()) // IMP Question: where is the best pos to check for this condition & WHY?
 					return;
 
 				this.displayGraph();
@@ -328,7 +322,7 @@ export class GraphUi {
 	}
 
 	stopDrawing() {
-		this.drawingStopped = true;
+		this.singleAsync.makeNewCall();
 	}
 
 	enableDrawing() {
