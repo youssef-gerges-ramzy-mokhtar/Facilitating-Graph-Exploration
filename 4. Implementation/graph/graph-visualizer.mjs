@@ -55,6 +55,10 @@ export class EdgeUi {
 		this.#initLine();
 	}
 
+	resetDefaults() {
+		this.line.resetDefaults();
+	}
+
 	#initLine() {
 		const x1 = this.from.x;
 		const y1 = this.from.y;
@@ -324,6 +328,15 @@ export class GraphUi {
 
 	enableDrawing() {
 		this.drawingStopped = false;
+	}
+
+	resetDefaults() {
+		const nodes = this.graph.getNodes();
+		for (const node of nodes)
+			this.nodeMapper.getObj(node).resetDefaults();
+
+		for (const edge of this.edgesUI)
+			edge.resetDefaults();
 	}
 
 	#calcForce(v) {
