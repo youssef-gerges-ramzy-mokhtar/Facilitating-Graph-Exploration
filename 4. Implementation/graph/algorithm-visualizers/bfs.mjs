@@ -48,7 +48,7 @@ export class BFSVisualizer {
 	}
 
 	stopVisualizer() {
-		SingleAsync.makeNewCall();
+		this.singleAsync.makeNewCall();
 	}
 
 	#resetGraph() {

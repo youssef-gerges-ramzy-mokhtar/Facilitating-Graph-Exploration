@@ -48,7 +48,7 @@ export class DFSVisualizer {
 	}
 
 	stopVisualizer() {
-		SingleAsync.makeNewCall();
+		this.singleAsync.makeNewCall();
 	}
 
 	#resetGraph() {
