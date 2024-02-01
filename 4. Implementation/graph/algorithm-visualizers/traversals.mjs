@@ -1,8 +1,8 @@
 "use strict";
 import {print, sleep, SingleAsync} from "../../utils/utils.mjs";
 
-export class DFSVisualizer {
-	constructor(graphUI) { // the construcotr is exactly the same as the BFS one use inheritance
+class GraphTraversalVisualizer {
+	constructor(graphUI) {
 		this.graphUI = graphUI;
 		this.visualizationTime = 1000;
 
@@ -25,7 +25,7 @@ export class DFSVisualizer {
 		if (nodeId === null)
 			throw new Error(`${startNode} does not exist in the graph`);
 
-		const algorithmSteps = this.#algorithm(nodeId, this.graphUI.getGraph().getDirectedAdjList());
+		const algorithmSteps = this._algorithm(nodeId, this.graphUI.getGraph().getDirectedAdjList());
 		for (const step of algorithmSteps) {
 			if (functionLock.callStopped()) // IMP Question: where is the best pos to check for this condition & WHY?
 				return;
@@ -56,7 +56,60 @@ export class DFSVisualizer {
 		this.graphUI.displayGraph();
 	}
 
-	#algorithm(curNode, adjList, algorithmSteps = [], vis = new Set()) {
+	_algorithm(startNode, adjList) {
+		throw new Error("This is an abstract protected method");
+	}
+}
+
+export class BFSVisualizer extends GraphTraversalVisualizer {
+	constructor(graphUI) {
+		super(graphUI);
+	}
+
+	_algorithm(startNode, adjList) {
+		const algorithmSteps = [];
+
+		const q = [];
+		const vis = new Set();
+
+		q.push(startNode);
+		vis.add(startNode);
+
+		for (let sz = q.length; q.length !== 0; sz = q.length) {
+			while (sz--) {
+				const curNode = q[0];
+				q.shift();
+
+				algorithmSteps.push({stepType: "CURRENT_NODE", u: curNode});
+				for (const neighbour of adjList[curNode]) {
+					algorithmSteps.push({stepType: "EDGE_TRAVERSAL", u: curNode, v: neighbour});
+
+					let treeEdgeUsed = false;
+					if (!vis.has(neighbour)) {
+						q.push(neighbour);
+						vis.add(neighbour);
+
+						algorithmSteps.push({stepType: "UNVISITED_NEIGHBOUR", u: neighbour});
+						treeEdgeUsed = true;
+					}
+
+					algorithmSteps.push({stepType: "EDGE_CLASSIFICATION", u: curNode, v: neighbour, treeEdge: treeEdgeUsed});
+				}
+
+				algorithmSteps.push({stepType: "CURRENT_NODE_FINISHED", u: curNode});
+			}
+		}
+
+		return algorithmSteps;
+	}
+}
+
+export class DFSVisualizer extends GraphTraversalVisualizer {
+	constructor(graphUI) {
+		super(graphUI);
+	}
+
+	_algorithm(curNode, adjList, algorithmSteps = [], vis = new Set()) {
 		vis.add(curNode);
 		algorithmSteps.push({stepType: "CURRENT_NODE", u: curNode});
 
@@ -72,7 +125,7 @@ export class DFSVisualizer {
 			algorithmSteps.push({stepType: "EDGE_CLASSIFICATION", u: curNode, v: neighbour, treeEdge: treeEdgeUsed});
 			
 			if (treeEdgeUsed)
-				this.#algorithm(neighbour, adjList, algorithmSteps, vis);
+				this._algorithm(neighbour, adjList, algorithmSteps, vis);
 		}
 
 		algorithmSteps.push({stepType: "CURRENT_NODE_FINISHED", u: curNode});
