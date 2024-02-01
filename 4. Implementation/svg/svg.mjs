@@ -2,25 +2,17 @@
 export const DRAWING_CANVAS = document.getElementById("graph_canvas");
 
 export class Circle {
-	constructor(x, y, col, radius, content, drawingArea, randomPoint) {
-		this.defaultOptions = {
-			x: 0,
-			y: 0,
-			col: "white",
-			radius: 19,
-			content: "",
-			drawingArea: DRAWING_CANVAS,
-		};
+	static defaultOptions = {
+		x: 0,
+		y: 0,
+		col: "white",
+		radius: 19,
+		content: "",
+		drawingArea: DRAWING_CANVAS,
+	}
 
-		this.x = x ?? this.defaultOptions.x;
-		this.y = y ?? this.defaultOptions.y;
-		this.col = col ?? this.defaultOptions.col;
-		this.radius = radius ?? this.defaultOptions.radius;
-		this.content = content ?? this.defaultOptions.content;
-		this.drawingArea = drawingArea ?? this.defaultOptions.drawingArea;
-	
-		if (randomPoint)
-			[this.x, this.y] = this.#randomCoords();
+	constructor(x, y, col, radius, content, drawingArea, randomPoint) {
+		this.#initCircle(x, y, col, radius, content, drawingArea, randomPoint);
 	}
 
 	display() {
@@ -46,6 +38,10 @@ export class Circle {
 		this.col = col ?? this.defaultOptions.col;
 	}
 
+	resetDefaults() {
+		this.#initCircle(this.x, this.y, undefined, undefined, this.content);
+	}
+
 	#validatePos(pos, maxRange) {
 		if (pos < this.radius)
 			return this.radius;
@@ -62,30 +58,34 @@ export class Circle {
 
 		return [Math.random()*drawAreaWidth + this.radius, Math.random()*drawAreaHeight + this.radius];
 	}
+
+	#initCircle(x, y, col, radius, content, drawingArea, randomPoint) {
+		this.x = x ?? Circle.defaultOptions.x;
+		this.y = y ?? Circle.defaultOptions.y;
+		this.col = col ?? Circle.defaultOptions.col;
+		this.radius = radius ?? Circle.defaultOptions.radius;
+		this.content = content ?? Circle.defaultOptions.content;
+		this.drawingArea = drawingArea ?? Circle.defaultOptions.drawingArea;
+	
+		if (randomPoint)
+			[this.x, this.y] = this.#randomCoords();
+	}
 }
 
 export class Line {
-	constructor(x1, y1, x2, y2, drawingArea, hasArrow) {
-		const defaultOptions = {
-			x1: 0,
-			y1: 0,
-			x2: 0,
-			y2: 0,
-			strokeWidth: 2,
-			strokeCol: "black",
-			drawingArea: DRAWING_CANVAS,
-			hasArrow: false
-		}
+	static defaultOptions = {
+		x1: 0,
+		y1: 0,
+		x2: 0,
+		y2: 0,
+		strokeWidth: 2,
+		strokeCol: "black",
+		drawingArea: DRAWING_CANVAS,
+		hasArrow: false
+	}
 
-		this.x1 = x1 ?? defaultOptions.x1;
-		this.y1 = y1 ?? defaultOptions.y1;
-		this.x2 = x2 ?? defaultOptions.x2;
-		this.y2 = y2 ?? defaultOptions.y2;
-		this.drawingArea = drawingArea ?? defaultOptions.drawingArea;
-		this.hasArrow = hasArrow ?? defaultOptions.hasArrow;
-		
-		this.strokeWidth = defaultOptions.strokeWidth;
-		this.strokeCol = defaultOptions.strokeCol;
+	constructor(x1, y1, x2, y2, drawingArea, hasArrow) {
+		this.#initLine(x1, y1, x2, y2, drawingArea, hasArrow);
 	}
 
 	setStrokeWidth(strokeWidth) {
@@ -105,6 +105,10 @@ export class Line {
 
 	setHasArrow(hasArrow) {
 		this.hasArrow = hasArrow;
+	}
+
+	resetDefaults() {
+		this.#initLine(this.x1, this.y1, this.x2, this.y2, this.drawingArea, this.hasArrow);
 	}
 
 	display() {
@@ -128,6 +132,18 @@ export class Line {
 			line = arrow + line;
 
 		addElementToSvg(line, this.drawingArea);
+	}
+
+	#initLine(x1, y1, x2, y2, drawingArea, hasArrow) {
+		this.x1 = x1 ?? Line.defaultOptions.x1;
+		this.y1 = y1 ?? Line.defaultOptions.y1;
+		this.x2 = x2 ?? Line.defaultOptions.x2;
+		this.y2 = y2 ?? Line.defaultOptions.y2;
+		this.drawingArea = drawingArea ?? Line.defaultOptions.drawingArea;
+		this.hasArrow = hasArrow ?? Line.defaultOptions.hasArrow;
+		
+		this.strokeWidth = Line.defaultOptions.strokeWidth;
+		this.strokeCol = Line.defaultOptions.strokeCol;
 	}
 }
 
