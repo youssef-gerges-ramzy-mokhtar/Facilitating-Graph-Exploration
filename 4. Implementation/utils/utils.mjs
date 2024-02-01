@@ -8,17 +8,19 @@ export function sleep(delay) {
 // The async function must ensure that they are not stopped before executing the critical secution using the callStopped() method
 export class SingleAsync {
 	static id = 1;
-	static prevAsyncFunction = new SingleAsync(); // can we make the prevAsyncFunction non-static
 
 	constructor() {
 		this.stopped = false;
 		this.id = SingleAsync.id++;
+		this.prevAsyncFunction = null;
 	}
 
-	static makeNewCall() {
-		SingleAsync.prevAsyncFunction.stopped = true;
-		SingleAsync.prevAsyncFunction = new SingleAsync();
-		return SingleAsync.prevAsyncFunction;
+	makeNewCall() {
+		if (this.prevAsyncFunction !== null)
+			this.prevAsyncFunction.stopped = true;
+		
+		this.prevAsyncFunction = new SingleAsync();
+		return this.prevAsyncFunction;
 	}
 
 	callStopped() {
