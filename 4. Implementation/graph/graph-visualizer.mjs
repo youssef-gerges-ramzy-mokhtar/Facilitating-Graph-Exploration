@@ -1,6 +1,6 @@
 "use strict";
 
-import {print, sleep} from ".././utils/utils.mjs";
+import {print, sleep, SingleAsync} from ".././utils/utils.mjs";
 import {DRAWING_CANVAS, Circle, Line, clearCanvas} from ".././svg/svg.mjs";
 
 export class EdgeUi {
@@ -213,8 +213,8 @@ export class GraphUi {
 		this.l = 130;
 
 		this.drawingStopped = false;
-
 		this.edgesUI = [];
+		this.singleAsync = new SingleAsync();
 	}
 
 	readAdjacencyMatrix(adjMatrix) {
@@ -255,6 +255,8 @@ export class GraphUi {
 	}
 
 	async drawGraph() {
+		const functionLock = this.singleAsync.makeNewCall();
+
 		const undirectedAdjList = this.graph.getUndirectedAdjList();
 		
 		this.displayGraph();
@@ -263,6 +265,9 @@ export class GraphUi {
 		for (let i = 0; i < 250; i++) {
 			for (let v = 0; v < undirectedAdjList.length; v++) {
 				if (this.drawingStopped)
+					return;
+
+				if (functionLock.callStopped())
 					return;
 
 				this.displayGraph();

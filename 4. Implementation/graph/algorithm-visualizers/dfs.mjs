@@ -13,10 +13,12 @@ export class DFSVisualizer {
 			EDGE_CLASSIFICATION: {color: "black", treeEdgeStrokeWidth: 4},
 			CURRENT_NODE_FINISHED: {color: "lightGreen"}
 		}
+
+		this.singleAsync = new SingleAsync();
 	}
 
 	async startVisualizer(startNode) {
-		const functionLock = SingleAsync.makeNewCall();
+		const functionLock = this.singleAsync.makeNewCall();
 		this.#resetGraph();
 
 		const nodeId = this.graphUI.getCircleId(startNode);

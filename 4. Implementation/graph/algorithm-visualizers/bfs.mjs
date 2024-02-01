@@ -1,5 +1,4 @@
 "use strict";
-
 import {print, sleep, SingleAsync} from "../../utils/utils.mjs";
 
 export class BFSVisualizer {
@@ -14,17 +13,19 @@ export class BFSVisualizer {
 			EDGE_CLASSIFICATION: {color: "black", treeEdgeStrokeWidth: 4},
 			CURRENT_NODE_FINISHED: {color: "lightGreen"}
 		}
+
+		this.singleAsync = new SingleAsync();
 	}
 
 	async startVisualizer(startNode) {
-		const functionLock = SingleAsync.makeNewCall();
+		const functionLock = this.singleAsync.makeNewCall();
 		this.#resetGraph();
 
 		const nodeId = this.graphUI.getCircleId(startNode);
 		if (nodeId === null)
 			throw new Error(`${startNode} does not exist in the graph`);
 
-		const algorithmSteps = this.#bfsAlgorithm(nodeId, this.graphUI.getGraph().getDirectedAdjList());
+		const algorithmSteps = this.#algorithm(nodeId, this.graphUI.getGraph().getDirectedAdjList());
 		for (const step of algorithmSteps) {
 			if (functionLock.callStopped()) // IMP Question: where is the best pos to check for this condition & WHY?
 				return;
@@ -55,7 +56,7 @@ export class BFSVisualizer {
 		this.graphUI.displayGraph();
 	}
 
-	#bfsAlgorithm(startNode, adjList) {
+	#algorithm(startNode, adjList) {
 		const algorithmSteps = [];
 
 		const q = [];
