@@ -4,7 +4,7 @@ import {print, sleep, SingleAsync} from "../../utils/utils.mjs";
 class GraphTraversalVisualizer {
 	constructor(graphUI) {
 		this.graphUI = graphUI;
-		this.visualizationTime = 1000;
+		this.visualizationTime = 700;
 
 		this.colors = {
 			CURRENT_NODE: {color: "lightBlue"},
