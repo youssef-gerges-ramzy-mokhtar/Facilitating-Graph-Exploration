@@ -90,6 +90,9 @@ class DFSDataLogger {
 
 	logInfo(info, logger) {
 		const {stepType, data} = info;
+
+		logger.log(`Stack = [${getNodeNames(this.graphUI, data.stack)}]`);
+		logger.log(`Visisted = [${getNodeNames(this.graphUI, data.vis)}]`);
 		logger.log("\n");
 	}
 }
@@ -143,30 +146,37 @@ export class BFSVisualizer extends GraphTraversalVisualizer {
 
 export class DFSVisualizer extends GraphTraversalVisualizer {
 	constructor(graphUI, logger) {
-		super(graphUI, logger, new DFSDataLogger());
+		super(graphUI, logger, new DFSDataLogger(graphUI, logger));
 	}
 
-	_algorithm(curNode, adjList, algorithmSteps = [], vis = new Set()) {
+	_algorithm(curNode, adjList, algorithmSteps = [], vis = new Set(), stack = []) {
+		stack.push(curNode);
 		vis.add(curNode);
-		algorithmSteps.push({stepType: "CURRENT_NODE", u: curNode});
+		algorithmSteps.push({stepType: "CURRENT_NODE", u: curNode, data: this.#getData(stack, vis)});
 
 		for (const neighbour of adjList[curNode]) {
-			algorithmSteps.push({stepType: "EDGE_TRAVERSAL", u: curNode, v: neighbour});
+			algorithmSteps.push({stepType: "EDGE_TRAVERSAL", u: curNode, v: neighbour, data: this.#getData(stack, vis)});
 			let treeEdgeUsed = false;
 
 			if (!vis.has(neighbour)) {
-				algorithmSteps.push({stepType: "UNVISITED_NEIGHBOUR", u: neighbour});
+				algorithmSteps.push({stepType: "UNVISITED_NEIGHBOUR", u: neighbour, data: this.#getData(stack, vis)});
 				treeEdgeUsed = true;
 			}
 
-			algorithmSteps.push({stepType: "EDGE_CLASSIFICATION", u: curNode, v: neighbour, treeEdge: treeEdgeUsed});
+			algorithmSteps.push({stepType: "EDGE_CLASSIFICATION", u: curNode, v: neighbour, treeEdge: treeEdgeUsed, data: this.#getData(stack, vis)});
 			
 			if (treeEdgeUsed)
-				this._algorithm(neighbour, adjList, algorithmSteps, vis);
+				this._algorithm(neighbour, adjList, algorithmSteps, vis, stack);
 		}
 
-		algorithmSteps.push({stepType: "CURRENT_NODE_FINISHED", u: curNode});
+		algorithmSteps.push({stepType: "CURRENT_NODE_FINISHED", u: curNode, data: this.#getData(stack, vis)});
+		stack.pop();
+
 		return algorithmSteps;
+	}
+
+	#getData(stack, vis) {
+		return {stack: [...stack], vis: [...vis]};
 	}
 }
 
