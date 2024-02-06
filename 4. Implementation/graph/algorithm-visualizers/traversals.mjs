@@ -90,6 +90,8 @@ class DFSDataLogger {
 
 	logInfo(info, logger) {
 		const {stepType, data} = info;
+		if (stepType != "CURRENT_NODE" && stepType != "CURRENT_NODE_FINISHED")
+			return;
 
 		logger.log(`Stack = [${getNodeNames(this.graphUI, data.stack)}]`);
 		logger.log(`Visisted = [${getNodeNames(this.graphUI, data.vis)}]`);
@@ -152,6 +154,7 @@ export class DFSVisualizer extends GraphTraversalVisualizer {
 	_algorithm(curNode, adjList, algorithmSteps = [], vis = new Set(), stack = []) {
 		stack.push(curNode);
 		vis.add(curNode);
+		
 		algorithmSteps.push({stepType: "CURRENT_NODE", u: curNode, data: this.#getData(stack, vis)});
 
 		for (const neighbour of adjList[curNode]) {
@@ -169,8 +172,8 @@ export class DFSVisualizer extends GraphTraversalVisualizer {
 				this._algorithm(neighbour, adjList, algorithmSteps, vis, stack);
 		}
 
-		algorithmSteps.push({stepType: "CURRENT_NODE_FINISHED", u: curNode, data: this.#getData(stack, vis)});
 		stack.pop();
+		algorithmSteps.push({stepType: "CURRENT_NODE_FINISHED", u: curNode, data: this.#getData(stack, vis)});
 
 		return algorithmSteps;
 	}
