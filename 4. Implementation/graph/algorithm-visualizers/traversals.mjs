@@ -2,6 +2,8 @@
 import {print, sleep, SingleAsync} from "../../utils/utils.mjs";
 
 class GraphTraversalVisualizer {
+	static singleAsync = new SingleAsync();
+
 	constructor(graphUI, logger, algorithmDataLogger) {
 		this.graphUI = graphUI;
 		this.logger = logger;
@@ -15,12 +17,10 @@ class GraphTraversalVisualizer {
 			EDGE_CLASSIFICATION: {color: "black", treeEdgeStrokeWidth: 4},
 			CURRENT_NODE_FINISHED: {color: "lightGreen"}
 		}
-
-		this.singleAsync = new SingleAsync();
 	}
 
 	async startVisualizer(startNode) {
-		const functionLock = this.singleAsync.makeNewCall();
+		const functionLock = GraphTraversalVisualizer.singleAsync.makeNewCall();
 		this.#resetGraph();
 
 		const nodeId = this.graphUI.getCircleId(startNode);
@@ -52,7 +52,7 @@ class GraphTraversalVisualizer {
 	}
 
 	stopVisualizer() {
-		this.singleAsync.makeNewCall();
+		GraphTraversalVisualizer.singleAsync.makeNewCall();
 	}
 
 	#resetGraph() {
@@ -154,7 +154,7 @@ export class DFSVisualizer extends GraphTraversalVisualizer {
 	_algorithm(curNode, adjList, algorithmSteps = [], vis = new Set(), stack = []) {
 		stack.push(curNode);
 		vis.add(curNode);
-		
+
 		algorithmSteps.push({stepType: "CURRENT_NODE", u: curNode, data: this.#getData(stack, vis)});
 
 		for (const neighbour of adjList[curNode]) {
