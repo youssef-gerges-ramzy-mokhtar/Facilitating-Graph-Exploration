@@ -18,8 +18,7 @@ class GraphInputHandler {
 		this.#graphInputEl.addEventListener("keyup", function (event) {
 			const {edgeList, nodes} = self.#praseGraphText(event.target.value)
 
-			// I don't like this if statement + it feels very buggy
-			if (event.target.value == "" || ((edgeList.length || nodes.length) && (event.key.length == 1 || event.key == "Backspace"))) 
+			if (self.#canDraw(event.target.value, edgeList, nodes, event.key))
 				self.#drawGraph(edgeList, nodes);
 		})
 
@@ -59,6 +58,26 @@ class GraphInputHandler {
 			return nodes;
 
 		return [];
+	}
+
+	#canDraw(inputText, edgeList, nodes, eventKey) {
+		if (inputText === "")
+			return true;
+
+		// Preventing the graph from re-drawing in case of "ctrl+key" is used 
+		const reDrawAllowedKeys = ['z', 'y', 'x', 'v'];
+		if (eventKey.ctrlKey && !reDrawAllowedKeys.includes(event.key.toLowerCase()))
+			return false;
+
+		// Preventing the graph from re-drawing in case the edgeList and nodes are both empty
+		if (edgeList.length === 0 && nodes.length === 0)
+			return false;
+
+		// Preventing the graph from re-drawing in case the user clicked a non-printable character or not a backspace
+		if (eventKey.length !== 1 && event.key !== "Backspace")
+			return false;
+
+		return true;
 	}
 }
 
