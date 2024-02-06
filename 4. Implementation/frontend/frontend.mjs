@@ -63,18 +63,27 @@ class GraphInputHandler {
 }
 
 class AlgorithmVisualizerHandler {
-	#algorithmStepsEl = document.getElementById("algorithm-steps");
-	#visualizationSelectionEl = document.getElementById("algorithm-selection")
-	
-	#currentVisualizer = "none";
-	#availableVisualizers = {
-		"bfs": new BFSVisualizer(graphUI),
-		"dfs": new DFSVisualizer(graphUI),
-		"none": null,
-		"dijkstra": null
-	};
+	#algorithmStepsEl;
+	#visualizationSelectionEl;
+	#algorithmStepsLogger;
+
+	#currentVisualizer;
+	#availableVisualizers;
 
 	constructor() {
+		this.#algorithmStepsEl = document.getElementById("algorithm-steps-container");
+		this.#visualizationSelectionEl = document.getElementById("algorithm-selection");
+
+		this.#algorithmStepsLogger = new HtmlLogger(this.#algorithmStepsEl);
+		this.#currentVisualizer = "none";
+
+		this.#availableVisualizers  = {
+			"bfs": new BFSVisualizer(graphUI, this.#algorithmStepsLogger),
+			"dfs": new DFSVisualizer(graphUI, this.#algorithmStepsLogger),
+			"none": null,
+			"dijkstra": null
+		};
+
 		this.#registerEventListeners();
 	}
 
@@ -90,19 +99,43 @@ class AlgorithmVisualizerHandler {
 				return;
 
 			const nodeText = textEl.textContent;
-			if (self.#availableVisualizers[self.#currentVisualizer])
+			if (self.#availableVisualizers[self.#currentVisualizer]) {
+				self.#algorithmStepsLogger.clear();
 				self.#availableVisualizers[self.#currentVisualizer].startVisualizer(nodeText);
+			}
 		})
 
 		this.#visualizationSelectionEl.addEventListener("change", function (event) {
 			self.#currentVisualizer = event.target.value;
-			if (self.#currentVisualizer === "none") {
-				self.#algorithmStepsEl.textContent = "";
+			self.#algorithmStepsLogger.clear();
+		
+			if (self.#currentVisualizer === "none")
 				return;
-			}
 
-			self.#algorithmStepsEl.textContent = "Waiting for node selection..."; // every visualizer should do its own specific logging
+			self.#waitingForNodesLog();
 		})
+	}
+
+	#waitingForNodesLog() {
+		this.#algorithmStepsLogger.log("Waiting for node selection...")
+		this.#algorithmStepsLogger.log("\n");	
+	}
+}
+
+class HtmlLogger {
+	#htmlEl = null;
+	constructor(htmlEl) {
+		this.#htmlEl = htmlEl;
+	}
+
+	log(info) {
+		this.#htmlEl.appendChild(document.createTextNode(info));
+		this.#htmlEl.appendChild(document.createElement('br'));
+	}
+
+	clear() {
+		this.#htmlEl.textContent = "";
+		this.#htmlEl.insertAdjacentHTML("beforeend", "<h2>Algorithm Steps</h2>");
 	}
 }
 

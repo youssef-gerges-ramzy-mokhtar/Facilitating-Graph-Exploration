@@ -2,10 +2,12 @@
 import {print, sleep, SingleAsync} from "../../utils/utils.mjs";
 
 class GraphTraversalVisualizer {
-	constructor(graphUI) {
+	constructor(graphUI, logger, algorithmDataLogger) {
 		this.graphUI = graphUI;
-		this.visualizationTime = 700;
+		this.logger = logger;
+		this.algorithmDataLogger = algorithmDataLogger;
 
+		this.visualizationTime = 700;
 		this.colors = {
 			CURRENT_NODE: {color: "lightBlue"},
 			EDGE_TRAVERSAL: {color: "cyan"},
@@ -42,6 +44,8 @@ class GraphTraversalVisualizer {
 					edgeLine.setStrokeWidth(this.colors[stepType].treeEdgeStrokeWidth);
 			}
 
+			this.algorithmDataLogger.logInfo(step, this.logger);
+
 			this.graphUI.displayGraph();
 			await sleep(this.visualizationTime);
 		}
@@ -61,9 +65,38 @@ class GraphTraversalVisualizer {
 	}
 }
 
+class BFSDataLogger {
+	constructor(graphUI, logger) {
+		this.graphUI = graphUI;
+		this.logger = logger;
+	}
+
+	logInfo(info, logger) {
+		const {stepType, data} = info;
+		if (stepType != "CURRENT_NODE" && stepType != "UNVISITED_NEIGHBOUR")
+			return;
+
+		logger.log(`Queue = [${getNodeNames(this.graphUI, data.q)}]`);
+		logger.log(`Visisted = [${getNodeNames(this.graphUI, data.vis)}]`);
+		logger.log("\n");
+	}
+}
+
+class DFSDataLogger {
+	constructor(graphUI, logger) {
+		this.graphUI = graphUI;
+		this.logger = logger;
+	}
+
+	logInfo(info, logger) {
+		const {stepType, data} = info;
+		logger.log("\n");
+	}
+}
+
 export class BFSVisualizer extends GraphTraversalVisualizer {
-	constructor(graphUI) {
-		super(graphUI);
+	constructor(graphUI, logger) {
+		super(graphUI, logger, new BFSDataLogger(graphUI, logger));
 	}
 
 	_algorithm(startNode, adjList) {
@@ -80,33 +113,37 @@ export class BFSVisualizer extends GraphTraversalVisualizer {
 				const curNode = q[0];
 				q.shift();
 
-				algorithmSteps.push({stepType: "CURRENT_NODE", u: curNode});
+				algorithmSteps.push({stepType: "CURRENT_NODE", u: curNode, data: this.#getData(q, vis)});
 				for (const neighbour of adjList[curNode]) {
-					algorithmSteps.push({stepType: "EDGE_TRAVERSAL", u: curNode, v: neighbour});
+					algorithmSteps.push({stepType: "EDGE_TRAVERSAL", u: curNode, v: neighbour, data: this.#getData(q, vis)});
 
 					let treeEdgeUsed = false;
 					if (!vis.has(neighbour)) {
 						q.push(neighbour);
 						vis.add(neighbour);
 
-						algorithmSteps.push({stepType: "UNVISITED_NEIGHBOUR", u: neighbour});
+						algorithmSteps.push({stepType: "UNVISITED_NEIGHBOUR", u: neighbour, data: this.#getData(q, vis)});
 						treeEdgeUsed = true;
 					}
 
-					algorithmSteps.push({stepType: "EDGE_CLASSIFICATION", u: curNode, v: neighbour, treeEdge: treeEdgeUsed});
+					algorithmSteps.push({stepType: "EDGE_CLASSIFICATION", u: curNode, v: neighbour, treeEdge: treeEdgeUsed, data: this.#getData(q, vis)});
 				}
 
-				algorithmSteps.push({stepType: "CURRENT_NODE_FINISHED", u: curNode});
+				algorithmSteps.push({stepType: "CURRENT_NODE_FINISHED", u: curNode, data: this.#getData(q, vis)});
 			}
 		}
 
 		return algorithmSteps;
 	}
+
+	#getData(q, vis) {
+		return {q: [...q], vis: [...vis]};
+	}
 }
 
 export class DFSVisualizer extends GraphTraversalVisualizer {
-	constructor(graphUI) {
-		super(graphUI);
+	constructor(graphUI, logger) {
+		super(graphUI, logger, new DFSDataLogger());
 	}
 
 	_algorithm(curNode, adjList, algorithmSteps = [], vis = new Set()) {
@@ -131,4 +168,8 @@ export class DFSVisualizer extends GraphTraversalVisualizer {
 		algorithmSteps.push({stepType: "CURRENT_NODE_FINISHED", u: curNode});
 		return algorithmSteps;
 	}
+}
+
+function getNodeNames(graphUI, nodes) {
+	return nodes.map(node => graphUI.getCircle(node).content);
 }
