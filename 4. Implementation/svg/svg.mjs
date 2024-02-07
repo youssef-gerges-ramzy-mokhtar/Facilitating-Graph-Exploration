@@ -81,11 +81,12 @@ export class Line {
 		strokeWidth: 2,
 		strokeCol: "black",
 		drawingArea: DRAWING_CANVAS,
-		hasArrow: false
+		hasArrow: false,
+		label: "123"
 	}
 
-	constructor(x1, y1, x2, y2, drawingArea, hasArrow) {
-		this.#initLine(x1, y1, x2, y2, drawingArea, hasArrow);
+	constructor(x1, y1, x2, y2, drawingArea, hasArrow, label) {
+		this.#initLine(x1, y1, x2, y2, drawingArea, hasArrow, label);
 	}
 
 	setStrokeWidth(strokeWidth) {
@@ -112,6 +113,21 @@ export class Line {
 	}
 
 	display() {
+		addElementToSvg(this.#createLineEl(), this.drawingArea);
+	}
+
+	#createLineEl() {
+		let line = `
+			<line x1="${this.x1}" y1="${this.y1}" x2="${this.x2}" y2="${this.y2}" stroke="${this.strokeCol}" stroke-width="${this.strokeWidth}" marker-end="url(#arrow)"  />
+		`
+
+		line += this.#createLineLabelEl();
+		line += (this.hasArrow ? this.#createArrowEl() : "");
+
+		return line;
+	}
+
+	#createArrowEl() {
 		const arrow = `
 			<marker 
 				id="arrow"
@@ -123,25 +139,53 @@ export class Line {
 				orient="auto-start-reverse"> 
 				<path d="M 0 0 L 10 5 L 0 10 z" />
 	  		</marker>
-		`	
-		let line = `
-			<line x1="${this.x1}" y1="${this.y1}" x2="${this.x2}" y2="${this.y2}" stroke="${this.strokeCol}" stroke-width="${this.strokeWidth}" marker-end="url(#arrow)"  />
 		`
 
-		if (this.hasArrow)
-			line = arrow + line;
-
-		addElementToSvg(line, this.drawingArea);
+		return arrow;
 	}
 
-	#initLine(x1, y1, x2, y2, drawingArea, hasArrow) {
+	#createLineLabelEl() {
+		const x = (this.x1 + this.x2) / 2;
+		const y = (this.y1 + this.y2) / 2;
+
+		const text = `
+			<text
+				x=${x}
+				y=${y}
+				transform="rotate(${this.#getTextAngle()}, ${x}, ${y})"
+				text-anchor="middle"
+				font-size="15px"
+				font-weight="bold"
+				dy="-0.35em"
+			>
+				${this.label}
+			</text>
+		`;
+
+		return text;
+	}
+
+	#getTextAngle() {
+		const opp = Math.abs(this.y2 - this.y1);
+		const hyp = Math.sqrt(Math.pow(this.y2 - this.y1, 2) + Math.pow(this.x2 - this.x1, 2));
+		let angle = Math.asin(opp/hyp) * (180/Math.PI);
+
+		const gradient = (this.y2 - this.y1)/(this.x2 - this.x1); // division by zero doesn't result in an error in JavaScript
+		if (gradient < 0)
+			angle *= -1;
+
+		return angle;
+	}
+
+	#initLine(x1, y1, x2, y2, drawingArea, hasArrow, label) {
 		this.x1 = x1 ?? Line.defaultOptions.x1;
 		this.y1 = y1 ?? Line.defaultOptions.y1;
 		this.x2 = x2 ?? Line.defaultOptions.x2;
 		this.y2 = y2 ?? Line.defaultOptions.y2;
 		this.drawingArea = drawingArea ?? Line.defaultOptions.drawingArea;
 		this.hasArrow = hasArrow ?? Line.defaultOptions.hasArrow;
-		
+		this.label = label ?? Line.defaultOptions.label;
+
 		this.strokeWidth = Line.defaultOptions.strokeWidth;
 		this.strokeCol = Line.defaultOptions.strokeCol;
 	}
