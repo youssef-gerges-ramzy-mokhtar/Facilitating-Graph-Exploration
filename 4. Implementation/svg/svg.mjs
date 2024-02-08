@@ -82,7 +82,7 @@ export class Line {
 		strokeCol: "black",
 		drawingArea: DRAWING_CANVAS,
 		hasArrow: false,
-		label: "123"
+		label: ""
 	}
 
 	constructor(x1, y1, x2, y2, drawingArea, hasArrow, label) {
@@ -106,6 +106,10 @@ export class Line {
 
 	setHasArrow(hasArrow) {
 		this.hasArrow = hasArrow;
+	}
+
+	setLabel(label) {
+		this.label = label;
 	}
 
 	resetDefaults() {
