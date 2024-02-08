@@ -4,9 +4,10 @@ import {print, sleep, SingleAsync} from ".././utils/utils.mjs";
 import {DRAWING_CANVAS, Circle, Line, clearCanvas} from ".././svg/svg.mjs";
 
 export class EdgeUi {
-	constructor(from, to, directedEdge) {
+	constructor(from, to, weight, directedEdge) {
 		this.from = from;
 		this.to = to;
+		this.weight = weight;
 		this.directedEdge = directedEdge;
 
 		this.line = new Line(0, 0, 0, 0, DRAWING_CANVAS);
@@ -70,6 +71,7 @@ export class EdgeUi {
 
 		this.line.setCoords(fromX, fromY, toX, toY);
 		this.line.setHasArrow(this.directedEdge);
+		this.line.setLabel(this.weight);
 	}
 }
 
@@ -116,27 +118,53 @@ class ObjectIdMapper {
 	}
 }
 
-class Graph {
+export class Graph {
 	constructor() {
-		this.edgeList = [];
-		this.nodes = new Set();
+	    this.edgeList = [];  // edgeList ====> array containg a tuple {from: val, to: val, weight: val}, we allow multi-edges
+	    this.nodes = new Set(); // nods ====> set of all nodes
 	}
 
+	// Normal Adjacency List representation where each index contains a dynamic array of all of its neighbours
 	readAdjacencyList(adjList) {
-		for (let u = 0; u < adjList.length; u++) {
-			this.addNode(u);
+		const n = adjList.length;
+		const weightedAdjList = this.#initializeAdjList(n, Array);
+
+		for (let u = 0; u < n; u++)
 			for (const v of adjList[u])
-				this.addEdge(u, v);
-		}
+				weightedAdjList[u].push({to: v, weight: 0});
+	
+		this.readAdjacencyListWithWeights(weightedAdjList);
+	}
+	// Adjacency List representation where each index contains a dynamic array of all of its neighbours represented as an object {to, weight}
+	readAdjacencyListWithWeights(adjList) {
+		for (let u = 0; u < adjList.length; u++)
+			this.addNode(u);
+
+		for (let from = 0; from < adjList.length; from++)
+			for (const neighbour of adjList[from])
+				this.addEdge(from, neighbour.to, neighbour.weight);
 	}
 
+	// adjMatrix is a 2d array where each cell contains a boolean value 
 	readAdjacencyMatrix(adjMatrix) {
-		for (let u = 0; u < adjMatrix.length; u++) {
+		const n = adjMatrix.length;
+		const weightedAdjMatrix = this.#initializeAdjMatrix(n);
+
+		for (let u = 0; u < n; u++)
+			for (let v = 0; v < n; v++)
+				weightedAdjMatrix[u][v] = adjMatrix[u][v] === true ? [0] : [];
+
+		this.readAdjacencyMatrixWithWeights(weightedAdjMatrix);
+	}
+	// adjMatrix is a 2d array where each cell contains an array of weights
+	readAdjacencyMatrixWithWeights(adjMatrix) {
+		for (let u = 0; u < adjMatrix.length; u++)
 			this.addNode(u);
-			for (const v = 0; v < adjMatrix.length; v++)
-				if (adjMatrix[u][v])
-					this.addEdge(u, v);
-		}
+
+		for (let u = 0; u < adjMatrix.length; u++)
+			for (let v = 0; v < adjMatrix.length; v++)
+				for (const w of adjMatrix[u][v])
+					this.addEdge(u, v, w);
 	}
 
 	addNode(node) {
@@ -145,47 +173,73 @@ class Graph {
 
 		this.nodes.add(node);
 	}
-
-	addEdge(from, to) {
-		if (typeof from !== "number" || typeof to !== "number")
+	addEdge(from, to, weight = 0) {
+		if (typeof from !== "number" || typeof to !== "number" || typeof weight !== "number")
 			throw new Error("Invalid Arguments Number Expected");
 
 		if (from !== to) // not a self-loop edge
-			this.edgeList.push([from, to]); // in the future you might want to check if this edge already exists (to prevent multi-edges)
-
+			this.edgeList.push({from, to, weight});
+		
 		this.addNode(from);
 		this.addNode(to);
 	}
+	addUndirectedEdge(from, to, weight = 0) {
+		this.addEdge(from, to, weight);
+		this.addEdge(to, from, weight);
+	}
 
-	addUndirectedEdge(from, to) {
-		this.addEdge(from, to);
-		this.addEdge(to, from);
+	getEdgeList() {
+		return this.edgeList.map(edge => {
+			const {weight, ...edgeCopy} = edge;
+			return edgeCopy;
+		});
+	}
+	getEdgeListWithWeights() {
+		return this.edgeList.map(edge => ({...edge}));
+	}
+	getNodes() {
+		return new Set(this.nodes);
 	}
 
 	getDirectedAdjList() {
-		const adjList = this.#initializeAdjList();
-		for (const [u, v] of this.edgeList)
-			adjList[u].add(v);
+		return this.#removeAdjListWeights(this.getDirectedAdjListWithWeights());
+	}
+	getUndirectedAdjList() {
+		return this.#removeAdjListWeights(this.getUndirectedAdjListWithWeights());
+	}
+	getDirectedAdjListWithWeights() {
+		const adjList = this.#initializeAdjList(this.nodes.size, Array);
+
+		for (const {from, to, weight} of this.edgeList)
+			adjList[from].push({to, weight});
 
 		return adjList;
 	}
-
-	getUndirectedAdjList() {
-		const adjList = this.#initializeAdjList();
-		for (const [u, v] of this.edgeList) {
-			adjList[u].add(v);
-			adjList[v].add(u);
+	getUndirectedAdjListWithWeights() {
+		const adjList = this.#initializeAdjList(this.nodes.size, Array);
+		for (const {from, to, weight} of this.edgeList) {
+			adjList[from].push({to, weight});
+			adjList[to].push({to: from, weight});
 		}
 
 		return adjList;
 	}
 
-	getEdgeList() {
-		return this.edgeList;
+	getNeighbours(node) {
+		const adjList = this.getDirectedAdjList();
+		return adjList[node];
+	} 
+	getNeighboursWithWeights(node) {
+		const adjList = this.getDirectedAdjListWithWeights();
+		return adjList[node];
 	}
-
-	getNodes() {
-		return new Set(this.nodes);
+	getWeights(from, to) {
+		const weights = new Set();
+		for (const edge of this.edgeList)
+			if (edge.from === from && edge.to === to)
+				weights.add(edge.weight);
+			
+		return weights;
 	}
 
 	clear() {
@@ -193,10 +247,27 @@ class Graph {
 		this.nodes.clear();
 	}
 
-	#initializeAdjList() {
-		const adjList = Array(this.nodes.size);
+	#initializeAdjMatrix(n) {
+		const adjMatrix = Array(n);
+		for (let i = 0; i < adjMatrix.length; i++)
+			adjMatrix[i] = Array(n);
+
+		return adjMatrix;
+	}
+	#initializeAdjList(n, FillType = Set) {
+		const adjList = Array(n);
 		for (let i = 0; i < adjList.length; i++)
-			adjList[i] = new Set();
+			adjList[i] = new FillType();
+
+		return adjList;
+	}
+	#removeAdjListWeights(weightedAdjList) {
+		const n = weightedAdjList.length;
+		const adjList = this.#initializeAdjList(n);
+
+		for (let from = 0; from < n; from++)
+			for (const neighbour of weightedAdjList[from])
+				adjList[from].add(neighbour.to);
 
 		return adjList;
 	}
@@ -208,26 +279,11 @@ export class GraphUi {
 		this.graph = new Graph();
 		this.isDirected = false;
 
-		this.k1 = 10;
-		this.k2 = Math.pow(1500, 2);
-		this.l = 130;
-
 		this.edgesUI = [];
 		this.singleAsync = new SingleAsync();
 	}
 
-	readAdjacencyMatrix(adjMatrix) {
-		this.graph.clear();
-		this.graph.readAdjacencyMatrix(adjMatrix);
-		this.readEdgeList(this.graph.getEdgeList(), this.graph.getNodes());
-	}
-
-	readAdjacencyList(adjList) {
-		this.graph.clear();
-		this.graph.readAdjacencyList(adjList);
-		this.readEdgeList(this.graph.getEdgeList(), this.graph.getNodes());
-	}
-
+	// this method does a lot of stuff and very lengthy try to simplify it a bit into multiple functions
 	readEdgeList(edgeList, nodes = []) {
 		this.#resetGraph();
 
@@ -244,13 +300,26 @@ export class GraphUi {
 			const fromNodeId = this.nodeMapper.getId(fromNodeCircle, edge[0]);
 			const toNodeId = this.nodeMapper.getId(toNodeCircle, edge[1]);
 
-			this.graph.addEdge(fromNodeId, toNodeId);
+			let edgeWeight = parseInt(edge[2])
+			if (isNaN(edgeWeight))
+				edgeWeight = 0;
+			this.graph.addEdge(fromNodeId, toNodeId, edgeWeight);
 		}
 
-		for (const edge of this.graph.getEdgeList())
+		for (const edge of this.graph.getEdgeListWithWeights()) {
+			const weights = this.graph.getWeights(edge.from, edge.to);
+			let weightsLabel = Array.from(weights).join(", ");
+
 			this.edgesUI.push(
-				new EdgeUi(this.nodeMapper.getObj(edge[0]), this.nodeMapper.getObj(edge[1]), this.isDirected)
-			); 
+				new EdgeUi(this.nodeMapper.getObj(edge.from), this.nodeMapper.getObj(edge.to), weightsLabel, this.isDirected)
+			);
+		}
+	}
+
+	readGraph(graph) {
+		const edgeList = graph.getEdgeListWithWeights().map(edge => [edge.from, edge.to, edge.weight]);
+		const nodes = graph.getNodes();
+		this.readEdgeList(edgeList, nodes);
 	}
 
 	async drawGraph() {
@@ -325,10 +394,6 @@ export class GraphUi {
 		this.singleAsync.makeNewCall();
 	}
 
-	enableDrawing() {
-		this.drawingStopped = false;
-	}
-
 	resetDefaults() {
 		const nodes = this.graph.getNodes();
 		for (const node of nodes)
@@ -339,6 +404,10 @@ export class GraphUi {
 	}
 
 	#calcForce(v) {
+		const k1 = 10;
+		const k2 = Math.pow(1500, 2);
+		const l = 130;
+
 		const undirectedAdjList = this.graph.getUndirectedAdjList();
 		let fx = 0, fy = 0;
 
@@ -348,7 +417,7 @@ export class GraphUi {
 			const edge = new EdgeUi(node, neighbourNode);
 			const edgeLength = edge.getEdgeLength();
 
-			const force = this.k1 * (edgeLength - this.l);
+			const force = k1 * (edgeLength - l);
 			fx += force * ((neighbourNode.x - node.x) / edgeLength);
 			fy += force * ((neighbourNode.y - node.y) / edgeLength);
 		}
@@ -361,7 +430,7 @@ export class GraphUi {
 			const edge = new EdgeUi(node, neighbourNode);
 			const edgeLength = edge.getEdgeLength();
 
-			const force = this.k2 / Math.pow(edgeLength, 2);
+			const force = k2 / Math.pow(edgeLength, 2);
 			fx += force * ((node.x - neighbourNode.x) / edgeLength);
 			fy += force * ((node.y - neighbourNode.y) / edgeLength);
 		}
@@ -373,15 +442,6 @@ export class GraphUi {
 		this.nodeMapper.clear();
 		this.graph.clear();
 		this.edgesUI = [];
-	}
-
-	#convertAdjListToEdgeList(adjList) {
-		const edgeList = [];
-		for (const node in adjList)
-			for (const neighbour of adjList[node])
-				edgeList.push([node, neighbour.toString()]);
-
-		return edgeList;
 	}
 }
 
