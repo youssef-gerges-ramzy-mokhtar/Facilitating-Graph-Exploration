@@ -36,26 +36,32 @@ class GraphInputHandler {
 		let rows = graphText.split("\n");
 		rows = rows.filter(row => row.length > 0);
 
-		const edgeList = [];
-		const nodes = [];
+		let edgeList = [];
+		let nodes = [];
 		for (const row of rows) {
-			const edge = this.#generateEdge(row.trim());
-			if (edge.length == 0)
-				return [];
+			const edge = this.#generateEdge(row);
+			if (edge.length == 0) {
+				edgeList = [];
+				nodes = [];
+				break;
+			}
 
-			if (edge.length == 2)
-				edgeList.push(edge);
-			else
+			if (edge.length === 1)
 				nodes.push(edge[0]);
+			else
+				edgeList.push(edge);
 		}
 
 		return {edgeList, nodes};
 	}
 
 	#generateEdge(row) {
-		let nodes = row.split(" ");
-		if (nodes.length == 1 || nodes.length == 2)
-			return nodes;
+		let words = row.split(" ").filter(word => word !== "");
+		if (words.length > 3)
+			words = words.slice(0, 3);
+
+		if (1 <= words.length && words.length <= 3)
+			return words;
 
 		return [];
 	}
