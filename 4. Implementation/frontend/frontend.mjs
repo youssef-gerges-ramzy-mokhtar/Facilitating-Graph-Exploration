@@ -1,6 +1,6 @@
 import {print, sleep} from "../utils/utils.mjs";
 import {GraphUi, EdgeUi, graphSamples} from "../graph/graph-visualizer.mjs"
-import {BFSVisualizer, DFSVisualizer} from "../graph/algorithm-visualizers/traversals.mjs"
+import {BFSVisualizer, DFSVisualizer, DijkstraVisualizer} from "../graph/algorithm-visualizers/traversals.mjs"
 import {DRAWING_CANVAS} from "../svg/svg.mjs";
 
 const graphUI = new GraphUi();
@@ -105,8 +105,8 @@ class AlgorithmVisualizerHandler {
 		this.#availableVisualizers  = {
 			"bfs": new BFSVisualizer(graphUI, this.#algorithmStepsLogger),
 			"dfs": new DFSVisualizer(graphUI, this.#algorithmStepsLogger),
-			"none": null,
-			"dijkstra": null
+			"dijkstra": new DijkstraVisualizer(graphUI, this.#algorithmStepsLogger),
+			"none": null
 		};
 
 		this.#registerEventListeners();
