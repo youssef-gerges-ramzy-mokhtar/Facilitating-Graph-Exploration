@@ -377,13 +377,11 @@ export class GraphUi {
 		return this.nodeMapper.getId(null, nodeText);
 	}
 
-	getEdge(fromId, toId) {
+	getEdges(fromId, toId) {
 		const fromNodeCircle = this.nodeMapper.getObj(fromId);
 		const toNodeCircle = this.nodeMapper.getObj(toId);
 
-		for (const edgeUi of this.edgesUI)
-			if (edgeUi.from == fromNodeCircle && edgeUi.to == toNodeCircle)
-				return edgeUi;
+		return this.edgesUI.filter(edgeUi => edgeUi.from == fromNodeCircle && edgeUi.to == toNodeCircle)
 	}
 
 	getGraph() {
