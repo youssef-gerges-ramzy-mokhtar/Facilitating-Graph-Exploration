@@ -8,8 +8,9 @@ const graphUI = new GraphUi();
 class GraphInputHandler {
 	#graphInputEl = document.getElementById("graph-data");
 	#graphTypeSelectEl = document.getElementById("graph-type");
-	constructor() {
+	constructor(algorithmVisualizerHandler) {
 		this.#registerEventListeners();
+		this.algorithmVisualizerHandler = algorithmVisualizerHandler;
 	}
 
 	#registerEventListeners() {
@@ -18,8 +19,11 @@ class GraphInputHandler {
 		this.#graphInputEl.addEventListener("keyup", function (event) {
 			const {edgeList, nodes} = self.#praseGraphText(event.target.value)
 
-			if (self.#canDraw(event.target.value, edgeList, nodes, event))
+			if (self.#canDraw(event.target.value, edgeList, nodes, event)) {
+				self.algorithmVisualizerHandler.stopAllVisualizers();
+				self.algorithmVisualizerHandler.clearLogger();
 				self.#drawGraph(edgeList, nodes);
+			}
 		})
 
 		this.#graphTypeSelectEl.addEventListener("change", function (event) {
@@ -90,6 +94,7 @@ class GraphInputHandler {
 class AlgorithmVisualizerHandler {
 	#algorithmStepsEl;
 	#visualizationSelectionEl;
+	#speedControllerEl;
 	#algorithmStepsLogger;
 
 	#currentVisualizer;
@@ -98,6 +103,7 @@ class AlgorithmVisualizerHandler {
 	constructor() {
 		this.#algorithmStepsEl = document.getElementById("algorithm-steps-container");
 		this.#visualizationSelectionEl = document.getElementById("algorithm-selection");
+		this.#speedControllerEl = document.getElementById("speed-controller");
 
 		this.#algorithmStepsLogger = new HtmlLogger(this.#algorithmStepsEl);
 		this.#currentVisualizer = "none";
@@ -112,10 +118,20 @@ class AlgorithmVisualizerHandler {
 		this.#registerEventListeners();
 	}
 
+	stopAllVisualizers() {
+		for (const visualizer of Object.values(this.#availableVisualizers))
+			if (visualizer)
+				visualizer.stopVisualizer();
+	}
+
+	clearLogger() {
+		this.#algorithmStepsLogger.clear();
+	}
+
 	#registerEventListeners() {
 		const self = this;
 
-		DRAWING_CANVAS.addEventListener("click", function (event) {
+		DRAWING_CANVAS.addEventListener("click", function(event) {
 			let textEl = event.target;
 			if (event.target.tagName == "circle")
 				textEl = event.target.nextElementSibling;
@@ -130,7 +146,7 @@ class AlgorithmVisualizerHandler {
 			}
 		})
 
-		this.#visualizationSelectionEl.addEventListener("change", function (event) {
+		this.#visualizationSelectionEl.addEventListener("change", function(event) {
 			self.#currentVisualizer = event.target.value;
 			self.#algorithmStepsLogger.clear();
 		
@@ -138,6 +154,12 @@ class AlgorithmVisualizerHandler {
 				return;
 
 			self.#waitingForNodesLog();
+		})
+
+		this.#speedControllerEl.addEventListener("input", function(event) {
+			for (const visualizer of Object.values(self.#availableVisualizers))
+				if (visualizer)
+					visualizer.setTime(2010 - this.value);
 		})
 	}
 
@@ -166,7 +188,7 @@ class HtmlLogger {
 
 export class FrontendHandler {
 	constructor() {
-		new GraphInputHandler();
-		new AlgorithmVisualizerHandler();
+		const algorithmVisualizerHandler = new AlgorithmVisualizerHandler();
+		new GraphInputHandler(algorithmVisualizerHandler);
 	}
 }

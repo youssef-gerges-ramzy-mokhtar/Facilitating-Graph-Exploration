@@ -97,18 +97,38 @@ svg {
 	width: 25%;
 }
 
-#algorithm-steps-container {
-	border: solid black 1px;
+#bottom-panel {
+	display: flex;
+	justify-content: space-between;
 	width: 94.9%;
 	margin: 0 auto;
 	margin-top: 30px;
-	height: 35vh;
-	overflow: auto;
-	padding: 0px;
-	padding: 15px;
+	height: 100%;
+	overflow: hidden;
 }
 
-#algorithm-steps-container h2 {
+#algorithm-steps-container, #visualization-options {
+	border: solid black 1px;
+	width: 50%;
+	padding: 15px;
+	max-height: 97%;
+}
+
+#algorithm-steps-container {
+	overflow: auto;
+	margin-right: 30px;
+}
+
+#bottom-panel h2 {
 	margin: 0px;
 	text-decoration: underline;
+}
+
+#speed-container {
+	width: 100%;
+	display: flex;
+}
+
+#speed-container input {
+	width: 90%;
 }

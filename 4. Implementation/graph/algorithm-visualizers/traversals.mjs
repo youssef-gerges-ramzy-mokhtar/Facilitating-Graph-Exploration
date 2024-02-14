@@ -10,7 +10,7 @@ class GraphTraversalVisualizer {
 		this.logger = logger;
 		this.algorithmDataLogger = algorithmDataLogger;
 
-		this.visualizationTime = 1500;
+		this.visualizationTime = 1000;
 		this.colors = {
 			CURRENT_NODE: {color: "lightBlue"},
 			EDGE_TRAVERSAL: {color: "cyan"},
@@ -60,6 +60,10 @@ class GraphTraversalVisualizer {
 
 	stopVisualizer() {
 		GraphTraversalVisualizer.singleAsync.makeNewCall();
+	}
+
+	setTime(time = 1000) {
+		this.visualizationTime = time;
 	}
 
 	#resetGraph() {
