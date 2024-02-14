@@ -99,6 +99,7 @@ class AlgorithmVisualizerHandler {
 	#stopGraphBtnEl;
 	#stopVisualizerBtnEl;
 	#clearAlgorithmStepsBtnEl;
+	#visualizationInstructionsEl;
 
 	#currentVisualizer;
 	#availableVisualizers;
@@ -110,6 +111,7 @@ class AlgorithmVisualizerHandler {
 		this.#stopGraphBtnEl = document.getElementById("btn1");
 		this.#stopVisualizerBtnEl = document.getElementById("btn2");
 		this.#clearAlgorithmStepsBtnEl = document.getElementById("btn3");
+		this.#visualizationInstructionsEl = document.getElementById("visualization-instructions");
 
 		this.#algorithmStepsLogger = new HtmlLogger(this.#algorithmStepsEl);
 		this.#currentVisualizer = "none";
@@ -155,6 +157,7 @@ class AlgorithmVisualizerHandler {
 		this.#visualizationSelectionEl.addEventListener("change", function(event) {
 			self.#currentVisualizer = event.target.value;
 			self.#algorithmStepsLogger.clear();
+			self.#visualizationInstructionsEl.textContent = "";
 		
 			if (self.#currentVisualizer === "none")
 				return;
@@ -190,8 +193,7 @@ class AlgorithmVisualizerHandler {
 	}
 
 	#waitingForNodesLog() {
-		this.#algorithmStepsLogger.log("Waiting for node selection...")
-		this.#algorithmStepsLogger.log("\n");	
+		this.#visualizationInstructionsEl.textContent = "Waiting for node selection...";
 	}
 }
 
