@@ -37,9 +37,16 @@ textarea {
 	width: 300px;
 }
 
+#main-container {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
 #graph-area {
 	display: flex;
 	justify-content: center;
+	height: 60%;
 }
 
 #graph-input {
@@ -56,6 +63,7 @@ textarea {
 
 #graph-input textarea {
 	width: inherit;
+	height: 100%;
 	font-size: 1rem;
 }
 
@@ -94,7 +102,10 @@ svg {
 }
 
 #left-graph-area {
+	display: flex;
+	flex-direction: column;
 	width: 25%;
+	height: 100%;
 }
 
 #bottom-panel {
@@ -103,7 +114,7 @@ svg {
 	width: 94.9%;
 	margin: 0 auto;
 	margin-top: 30px;
-	height: 100%;
+	height: 40%;
 	overflow: hidden;
 }
 
@@ -127,8 +138,29 @@ svg {
 #speed-container {
 	width: 100%;
 	display: flex;
+	font-size: 1.3em;
 }
 
 #speed-container input {
 	width: 90%;
+}
+
+#button-options-container {
+	display: flex;
+	justify-content: center;
+}
+
+#button-options-container button {
+	padding: 0.4rem;
+	border: none;
+	margin: 1em;
+	background-color: #111827;
+	border-radius: 10px;
+	font-size: 1.02em;
+	color: white;
+}
+
+#button-options-container button:hover {
+	opacity: 0.8;
+	transition: 500ms;
 }

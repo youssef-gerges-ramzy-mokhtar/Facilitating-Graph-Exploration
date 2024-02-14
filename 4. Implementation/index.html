@@ -13,55 +13,64 @@
 		<a href="#" id="help">Help</a>
 	</header>
 
-	<div id="graph-area">
-		<div id="left-graph-area">
-			<div id="options">
-				<div id="options-title">Options</div>
+	<main id="main-container">
+		<div id="graph-area">
+			<div id="left-graph-area">
+				<div id="options">
+					<div id="options-title">Options</div>
 
-				<div id="select-options">
-					<select id="graph-type" name="Graph-Type">
-						<option selected disabled>Graph Type</option>
-						<option value="undirected">Undirected</option>
-						<option value="directed">Directed</option>
-					</select>
+					<div id="select-options">
+						<select id="graph-type" name="Graph-Type">
+							<option selected disabled>Graph Type</option>
+							<option value="undirected">Undirected</option>
+							<option value="directed">Directed</option>
+						</select>
 
-					<select id="algorithm-selection" name="Visualization-Algorithm">
-						<option selected disabled>Visualization</option>
-						<option value="none">None</option>
-						<option value="dfs">Depth-First Search</option>
-						<option value="bfs">Breadth-First Search</option>
-						<option value="dijkstra">Dijkstra's Algorithm</option>
-					</select>
+						<select id="algorithm-selection" name="Visualization-Algorithm">
+							<option selected disabled>Visualization</option>
+							<option value="none">None</option>
+							<option value="dfs">Depth-First Search</option>
+							<option value="bfs">Breadth-First Search</option>
+							<option value="dijkstra">Dijkstra's Algorithm</option>
+						</select>
+					</div>
+				</div>
+
+				<div id="graph-input">
+					<div>Graph Data</div>
+					<textarea id="graph-data"></textarea>
 				</div>
 			</div>
-
-			<div id="graph-input">
-				<div>Graph Data</div>
-				<textarea id="graph-data"></textarea>
+			
+			<div id="drawing-area">
+				<svg id="graph_canvas" xmlns="http://www.w3.org/2000/svg">
+					<rect width="100%" height="100%" style="fill:rgb(255,255,255);stroke-width:3;stroke:rgb(0,0,0)"/>
+				</svg>
 			</div>
 		</div>
-		
-		<div id="drawing-area">
-			<svg id="graph_canvas" xmlns="http://www.w3.org/2000/svg">
-				<rect width="100%" height="100%" style="fill:rgb(255,255,255);stroke-width:3;stroke:rgb(0,0,0)"/>
-			</svg>
-		</div>
-	</div>
 
-	<div id="bottom-panel">
-		<div id="algorithm-steps-container">
-			<h2>Algorithm Steps</h2>
-		</div>
+		<div id="bottom-panel">
+			<div id="algorithm-steps-container">
+				<h2>Algorithm Steps</h2>
+			</div>
 
-		<div id="visualization-options">
-			<h2>Visualization Options</h2>
-			<br />
-			<div id="speed-container">
-				<span>speed: </span>
-				<input id="speed-controller" value="1010" min="10" max="2000" type="range" />
+			<div id="visualization-options">
+				<h2>Visualization Options</h2>
+				<br />
+				<div id="speed-container">
+					<span>speed </span>
+					<input id="speed-controller" value="1010" min="10" max="2000" type="range" />
+				</div>
+
+				<div id="button-options-container">
+					<button id="btn1">Stop Drawing</button>
+					<button id="btn2">Stop Visualizer</button>
+					<button id="btn3">Clear Algorithm Steps</button>
+				</div>
 			</div>
 		</div>
-	</div>
+	</main>
+
 
 	<script type="module" src="script.mjs"></script>
 </body>
