@@ -96,6 +96,9 @@ class AlgorithmVisualizerHandler {
 	#visualizationSelectionEl;
 	#speedControllerEl;
 	#algorithmStepsLogger;
+	#stopGraphBtnEl;
+	#stopVisualizerBtnEl;
+	#clearAlgorithmStepsBtnEl;
 
 	#currentVisualizer;
 	#availableVisualizers;
@@ -104,6 +107,8 @@ class AlgorithmVisualizerHandler {
 		this.#algorithmStepsEl = document.getElementById("algorithm-steps-container");
 		this.#visualizationSelectionEl = document.getElementById("algorithm-selection");
 		this.#speedControllerEl = document.getElementById("speed-controller");
+		this.#stopGraphBtnEl = document.getElementById("btn1");
+		this.#stopVisualizerBtnEl = document.getElementById("btn2");
 
 		this.#algorithmStepsLogger = new HtmlLogger(this.#algorithmStepsEl);
 		this.#currentVisualizer = "none";
@@ -160,6 +165,22 @@ class AlgorithmVisualizerHandler {
 			for (const visualizer of Object.values(self.#availableVisualizers))
 				if (visualizer)
 					visualizer.setTime(2010 - this.value);
+		})
+
+		this.#stopGraphBtnEl.addEventListener("click", function(event) {
+			const btnType = this.textContent;
+			let oppositeText = btnType === "Stop Drawing" ? "Continue Drawing" : "Stop Drawing";
+
+			if (btnType === "Stop Drawing")
+				graphUI.stopDrawing();
+			else
+				graphUI.drawGraph();
+
+			this.textContent = oppositeText;
+		})
+
+		this.#stopVisualizerBtnEl.addEventListener("click", function(event) {
+			self.stopAllVisualizers();
 		})
 	}
 

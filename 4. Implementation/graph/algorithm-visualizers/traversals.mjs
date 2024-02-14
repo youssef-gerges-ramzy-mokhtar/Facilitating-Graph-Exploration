@@ -60,6 +60,7 @@ class GraphTraversalVisualizer {
 
 	stopVisualizer() {
 		GraphTraversalVisualizer.singleAsync.makeNewCall();
+		this.#resetGraph();
 	}
 
 	setTime(time = 1000) {
