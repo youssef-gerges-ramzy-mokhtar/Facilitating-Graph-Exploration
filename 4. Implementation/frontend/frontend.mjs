@@ -8,8 +8,9 @@ const graphUI = new GraphUi();
 class GraphInputHandler {
 	#graphInputEl = document.getElementById("graph-data");
 	#graphTypeSelectEl = document.getElementById("graph-type");
-	constructor() {
+	constructor(algorithmVisualizerHandler) {
 		this.#registerEventListeners();
+		this.algorithmVisualizerHandler = algorithmVisualizerHandler;
 	}
 
 	#registerEventListeners() {
@@ -18,8 +19,11 @@ class GraphInputHandler {
 		this.#graphInputEl.addEventListener("keyup", function (event) {
 			const {edgeList, nodes} = self.#praseGraphText(event.target.value)
 
-			if (self.#canDraw(event.target.value, edgeList, nodes, event))
+			if (self.#canDraw(event.target.value, edgeList, nodes, event)) {
+				self.algorithmVisualizerHandler.stopAllVisualizers();
+				self.algorithmVisualizerHandler.clearLogger();
 				self.#drawGraph(edgeList, nodes);
+			}
 		})
 
 		this.#graphTypeSelectEl.addEventListener("change", function (event) {
@@ -112,6 +116,16 @@ class AlgorithmVisualizerHandler {
 		this.#registerEventListeners();
 	}
 
+	stopAllVisualizers() {
+		for (const visualizer of Object.values(this.#availableVisualizers))
+			if (visualizer)
+				visualizer.stopVisualizer();
+	}
+
+	clearLogger() {
+		this.#algorithmStepsLogger.clear();
+	}
+
 	#registerEventListeners() {
 		const self = this;
 
@@ -166,7 +180,7 @@ class HtmlLogger {
 
 export class FrontendHandler {
 	constructor() {
-		new GraphInputHandler();
-		new AlgorithmVisualizerHandler();
+		const algorithmVisualizerHandler = new AlgorithmVisualizerHandler();
+		new GraphInputHandler(algorithmVisualizerHandler);
 	}
 }
