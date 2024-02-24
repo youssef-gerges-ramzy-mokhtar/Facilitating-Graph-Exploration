@@ -5,10 +5,9 @@ import {Graph} from "../graph-visualizer.mjs";
 class GraphTraversalVisualizer {
 	static singleAsync = new SingleAsync();
 
-	constructor(graphUI, logger, algorithmDataLogger) {
+	constructor(graphUI, logger) {
 		this.graphUI = graphUI;
 		this.logger = logger;
-		this.algorithmDataLogger = algorithmDataLogger;
 
 		this.visualizationTime = 1000;
 		this.colors = {
@@ -48,7 +47,7 @@ class GraphTraversalVisualizer {
 						edgeLine.setStrokeWidth(this.colors[stepType].treeEdgeStrokeWidth);
 			}
 
-			this.algorithmDataLogger.logInfo(step, this.logger);
+			this._logInfo(step);
 			this.graphUI.displayGraph();
 
 			if (stepType === "PREPARING_GRAPH")
@@ -72,70 +71,18 @@ class GraphTraversalVisualizer {
 		this.graphUI.displayGraph();
 	}
 
+	_logInfo(step) {
+		throw new Error("This is an abstract protected method")
+	}
+
 	_algorithm(startNode, adjList) {
 		throw new Error("This is an abstract protected method");
 	}
 }
 
-class BFSDataLogger {
-	constructor(graphUI, logger) {
-		this.graphUI = graphUI;
-		this.logger = logger;
-	}
-
-	logInfo(info, logger) {
-		const {stepType, data} = info;
-		if (stepType != "CURRENT_NODE" && stepType != "UNVISITED_NEIGHBOUR")
-			return;
-
-		logger.log(`Queue = [${getNodeNames(this.graphUI, data.q)}]`);
-		logger.log(`Visisted = [${getNodeNames(this.graphUI, data.vis)}]`);
-		logger.log("\n");
-	}
-}
-
-class DFSDataLogger {
-	constructor(graphUI, logger) {
-		this.graphUI = graphUI;
-		this.logger = logger;
-	}
-
-	logInfo(info, logger) {
-		const {stepType, data} = info;
-		if (stepType != "CURRENT_NODE" && stepType != "CURRENT_NODE_FINISHED")
-			return;
-
-		logger.log(`Stack = [${getNodeNames(this.graphUI, data.stack)}]`);
-		logger.log(`Visisted = [${getNodeNames(this.graphUI, data.vis)}]`);
-		logger.log("\n");
-	}
-}
-
-// Class still under implementation
-class DijkstraDataLogger {
-	constructor(graphUI, logger) {
-		this.graphUI = graphUI;
-		this.logger = logger;
-	}
-
-	logInfo(info, logger) {
-		// write that dijkstra will only work on a directed graph for now
-		
-		const {stepType, data} = info;
-		if (!data) {
-			logger.log(`${stepType}: ${info.reason}`);
-			return;
-		}
-
-		logger.log(`Dist = [${data.dist}]`);
-		logger.log(`Visited = [${getNodeNames(this.graphUI, data.vis)}]`);
-		logger.log("\n");
-	}
-}
-
 export class BFSVisualizer extends GraphTraversalVisualizer {
 	constructor(graphUI, logger) {
-		super(graphUI, logger, new BFSDataLogger(graphUI, logger));
+		super(graphUI, logger);
 	}
 
 	_algorithm(startNode, graph) {
@@ -176,6 +123,16 @@ export class BFSVisualizer extends GraphTraversalVisualizer {
 		return algorithmSteps;
 	}
 
+	_logInfo(step) {
+		const {stepType, data} = step;
+		if (stepType != "CURRENT_NODE" && stepType != "UNVISITED_NEIGHBOUR")
+			return;
+
+		this.logger.log(`Queue = [${getNodeNames(this.graphUI, data.q)}]`);
+		this.logger.log(`Visisted = [${getNodeNames(this.graphUI, data.vis)}]`);
+		this.logger.log("\n");
+	}
+
 	#getData(q, vis) {
 		return {q: [...q], vis: [...vis]};
 	}
@@ -183,7 +140,7 @@ export class BFSVisualizer extends GraphTraversalVisualizer {
 
 export class DFSVisualizer extends GraphTraversalVisualizer {
 	constructor(graphUI, logger) {
-		super(graphUI, logger, new DFSDataLogger(graphUI, logger));
+		super(graphUI, logger);
 	}
 
 	_algorithm(curNode, graph, algorithmSteps = [], vis = new Set(), stack = []) {
@@ -219,6 +176,16 @@ export class DFSVisualizer extends GraphTraversalVisualizer {
 		return algorithmSteps;
 	}
 
+	_logInfo(step) {
+		const {stepType, data} = step;
+		if (stepType != "CURRENT_NODE" && stepType != "CURRENT_NODE_FINISHED")
+			return;
+
+		this.logger.log(`Stack = [${getNodeNames(this.graphUI, data.stack)}]`);
+		this.logger.log(`Visisted = [${getNodeNames(this.graphUI, data.vis)}]`);
+		this.logger.log("\n");
+	}
+
 	#getData(stack, vis) {
 		return {stack: [...stack], vis: [...vis]};
 	}
@@ -226,7 +193,7 @@ export class DFSVisualizer extends GraphTraversalVisualizer {
 
 export class DijkstraVisualizer extends GraphTraversalVisualizer {
 	constructor(graphUI, logger) {
-		super(graphUI, logger, new DijkstraDataLogger(graphUI, logger));
+		super(graphUI, logger);
 	}
 
 	_algorithm(src, graph) {
@@ -270,6 +237,20 @@ export class DijkstraVisualizer extends GraphTraversalVisualizer {
 		}
 
 		return algorithmSteps;
+	}
+
+	// still under implementation
+	_logInfo(step) {
+		// write that dijkstra will only work on a directed graph for now
+		const {stepType, data} = step;
+		if (!data) {
+			this.logger.log(`${stepType}: ${step.reason}`);
+			return;
+		}
+
+		this.logger.log(`Dist = [${data.dist}]`);
+		this.logger.log(`Visited = [${getNodeNames(this.graphUI, data.vis)}]`);
+		this.logger.log("\n");
 	}
 
 	#hasNegativeWeights(adjList) {
