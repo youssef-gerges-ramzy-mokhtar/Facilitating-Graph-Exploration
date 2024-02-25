@@ -2,11 +2,11 @@
 import {print, sleep, SingleAsync} from "../../utils/utils.mjs";
 import {Graph} from "../graph-visualizer.mjs";
 
-class GraphTraversalVisualizer {
+class GraphVisualizer {
 	static singleAsync = new SingleAsync();
 
-	constructor(graphUI, logger) {
-		this.graphUI = graphUI;
+	constructor(graphDrawingEngine, logger) {
+		this.graphDrawingEngine = graphDrawingEngine;
 		this.logger = logger;
 
 		this.visualizationTime = 1000;
@@ -20,14 +20,14 @@ class GraphTraversalVisualizer {
 	}
 
 	async startVisualizer(startNode) {
-		const functionLock = GraphTraversalVisualizer.singleAsync.makeNewCall();
+		const functionLock = GraphVisualizer.singleAsync.makeNewCall();
 		this.#resetGraph();
 
-		const nodeId = this.graphUI.getCircleId(startNode);
+		const nodeId = this.graphDrawingEngine.getCircleId(startNode);
 		if (nodeId === null)
 			throw new Error(`${startNode} does not exist in the graph`);
 
-		const algorithmSteps = this._algorithm(nodeId, this.graphUI.getGraph());
+		const algorithmSteps = this._algorithm(nodeId, this.graphDrawingEngine.getGraph());
 		for (const step of algorithmSteps) {
 			if (functionLock.callStopped()) // IMP Question: where is the best pos to check for this condition & WHY?
 				return;
@@ -35,9 +35,9 @@ class GraphTraversalVisualizer {
 			const {stepType, u} = step;
 
 			if (stepType === "CURRENT_NODE" || stepType === "UNVISITED_NEIGHBOUR" || stepType === "CURRENT_NODE_FINISHED")
-				this.graphUI.getCircle(u).setColor(this.colors[stepType].color);
+				this.graphDrawingEngine.getCircle(u).setColor(this.colors[stepType].color);
 			else if (stepType === "EDGE_TRAVERSAL" || stepType === "EDGE_CLASSIFICATION") {
-				const edges = this.graphUI.getEdges(u, step.v)
+				const edges = this.graphDrawingEngine.getEdges(u, step.v)
 				const edgeLines = edges.map(edge => edge.getLine());
 				for (const edgeLine of edgeLines)
 					edgeLine.setStrokeCol(this.colors[stepType].color)
@@ -48,7 +48,7 @@ class GraphTraversalVisualizer {
 			}
 
 			this._logInfo(step);
-			this.graphUI.displayGraph();
+			this.graphDrawingEngine.displayGraph();
 
 			if (stepType === "PREPARING_GRAPH")
 				continue;
@@ -58,7 +58,7 @@ class GraphTraversalVisualizer {
 	}
 
 	stopVisualizer() {
-		GraphTraversalVisualizer.singleAsync.makeNewCall();
+		GraphVisualizer.singleAsync.makeNewCall();
 		this.#resetGraph();
 	}
 
@@ -67,28 +67,28 @@ class GraphTraversalVisualizer {
 	}
 
 	#resetGraph() {
-		this.graphUI.resetDefaults();
-		this.graphUI.displayGraph();
+		this.graphDrawingEngine.resetDefaults();
+		this.graphDrawingEngine.displayGraph();
 	}
 
 	_logInfo(step) {
 		throw new Error("This is an abstract protected method")
 	}
 
-	_algorithm(startNode, adjList) {
+	_algorithm(startNode, graph) {
 		throw new Error("This is an abstract protected method");
 	}
 }
 
-export class BFSVisualizer extends GraphTraversalVisualizer {
-	constructor(graphUI, logger) {
-		super(graphUI, logger);
+export class BFSVisualizer extends GraphVisualizer {
+	constructor(graphDrawingEngine, logger) {
+		super(graphDrawingEngine, logger);
 	}
 
 	_algorithm(startNode, graph) {
 		const algorithmSteps = [];
 
-		const adjList = graph.getDirectedAdjList();
+		const adjList = graph.getAdjList();
 		const q = [];
 		const vis = new Set();
 
@@ -128,8 +128,8 @@ export class BFSVisualizer extends GraphTraversalVisualizer {
 		if (stepType != "CURRENT_NODE" && stepType != "UNVISITED_NEIGHBOUR")
 			return;
 
-		this.logger.log(`Queue = [${getNodeNames(this.graphUI, data.q)}]`);
-		this.logger.log(`Visisted = [${getNodeNames(this.graphUI, data.vis)}]`);
+		this.logger.log(`Queue = [${getNodeNames(this.graphDrawingEngine, data.q)}]`);
+		this.logger.log(`Visisted = [${getNodeNames(this.graphDrawingEngine, data.vis)}]`);
 		this.logger.log("\n");
 	}
 
@@ -138,9 +138,9 @@ export class BFSVisualizer extends GraphTraversalVisualizer {
 	}
 }
 
-export class DFSVisualizer extends GraphTraversalVisualizer {
-	constructor(graphUI, logger) {
-		super(graphUI, logger);
+export class DFSVisualizer extends GraphVisualizer {
+	constructor(graphDrawingEngine, logger) {
+		super(graphDrawingEngine, logger);
 	}
 
 	_algorithm(curNode, graph, algorithmSteps = [], vis = new Set(), stack = []) {
@@ -148,7 +148,7 @@ export class DFSVisualizer extends GraphTraversalVisualizer {
 		// _algorithm() might call an internal dfs() function and pass to it the adjList
 		let adjList = graph;
 		if (graph instanceof Graph)
-			adjList = graph.getDirectedAdjList();
+			adjList = graph.getAdjList();
 
 		stack.push(curNode);
 		vis.add(curNode);
@@ -181,8 +181,8 @@ export class DFSVisualizer extends GraphTraversalVisualizer {
 		if (stepType != "CURRENT_NODE" && stepType != "CURRENT_NODE_FINISHED")
 			return;
 
-		this.logger.log(`Stack = [${getNodeNames(this.graphUI, data.stack)}]`);
-		this.logger.log(`Visisted = [${getNodeNames(this.graphUI, data.vis)}]`);
+		this.logger.log(`Stack = [${getNodeNames(this.graphDrawingEngine, data.stack)}]`);
+		this.logger.log(`Visisted = [${getNodeNames(this.graphDrawingEngine, data.vis)}]`);
 		this.logger.log("\n");
 	}
 
@@ -191,13 +191,13 @@ export class DFSVisualizer extends GraphTraversalVisualizer {
 	}
 }
 
-export class DijkstraVisualizer extends GraphTraversalVisualizer {
-	constructor(graphUI, logger) {
-		super(graphUI, logger);
+export class DijkstraVisualizer extends GraphVisualizer {
+	constructor(graphDrawingEngine, logger) {
+		super(graphDrawingEngine, logger);
 	}
 
 	_algorithm(src, graph) {
-		let adjList = graph.getDirectedAdjListWithWeights();
+		let adjList = graph.getAdjListWithWeights();
 		if (this.#hasNegativeWeights(adjList))
 			return [{stepType: "INVALID_GRAPH", reason: "Dijkstra's Algorithm only works with +ve weight edges"}];
 
@@ -249,7 +249,7 @@ export class DijkstraVisualizer extends GraphTraversalVisualizer {
 		}
 
 		this.logger.log(`Dist = [${data.dist}]`);
-		this.logger.log(`Visited = [${getNodeNames(this.graphUI, data.vis)}]`);
+		this.logger.log(`Visited = [${getNodeNames(this.graphDrawingEngine, data.vis)}]`);
 		this.logger.log("\n");
 	}
 
@@ -315,6 +315,6 @@ export class DijkstraVisualizer extends GraphTraversalVisualizer {
 	}
 }
 
-function getNodeNames(graphUI, nodes) {
-	return nodes.map(node => graphUI.getCircle(node).content);
+function getNodeNames(graphDrawingEngine, nodes) {
+	return nodes.map(node => graphDrawingEngine.getCircle(node).content);
 }

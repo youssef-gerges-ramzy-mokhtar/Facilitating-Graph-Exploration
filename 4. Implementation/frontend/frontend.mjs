@@ -1,42 +1,44 @@
 import {print, sleep} from "../utils/utils.mjs";
-import {GraphUi, EdgeUi, graphSamples} from "../graph/graph-visualizer.mjs"
+import {GraphDrawingEngine, EdgeUi, graphSamples} from "../graph/graph-visualizer.mjs"
 import {BFSVisualizer, DFSVisualizer, DijkstraVisualizer} from "../graph/algorithm-visualizers/traversals.mjs"
 import {DRAWING_CANVAS} from "../svg/svg.mjs";
 
-const graphUI = new GraphUi();
+const graphDrawingEngine = new GraphDrawingEngine();
 
 class GraphInputHandler {
 	#graphInputEl = document.getElementById("graph-data");
 	#graphTypeSelectEl = document.getElementById("graph-type");
+	#algorithmVisualizerHandler;
+
 	constructor(algorithmVisualizerHandler) {
 		this.#registerEventListeners();
-		this.algorithmVisualizerHandler = algorithmVisualizerHandler;
+		this.#algorithmVisualizerHandler = algorithmVisualizerHandler;
 	}
 
 	#registerEventListeners() {
 		const self = this;
 
 		this.#graphInputEl.addEventListener("keyup", function (event) {
-			const {edgeList, nodes} = self.#praseGraphText(event.target.value)
+			const {edgeList, nodes} = self.#parseGraphText(event.target.value)
 
 			if (self.#canDraw(event.target.value, edgeList, nodes, event)) {
-				self.algorithmVisualizerHandler.stopAllVisualizers();
-				self.algorithmVisualizerHandler.clearLogger();
+				self.#algorithmVisualizerHandler.stopAllVisualizers();
+				self.#algorithmVisualizerHandler.clearLogger();
 				self.#drawGraph(edgeList, nodes);
 			}
 		})
 
 		this.#graphTypeSelectEl.addEventListener("change", function (event) {
-			graphUI.setDirected(event.target.value === "directed");
+			graphDrawingEngine.setDirected(event.target.value === "directed");
 		})
 	}
 
 	#drawGraph(edgeList, nodes) {
-		graphUI.readEdgeList(edgeList, nodes)
-		graphUI.drawGraph()
+		graphDrawingEngine.readEdgeList(edgeList, nodes)
+		graphDrawingEngine.drawGraph()
 	}
 
-	#praseGraphText(graphText) {
+	#parseGraphText(graphText) {
 		let rows = graphText.split("\n");
 		rows = rows.filter(row => row.length > 0);
 
@@ -117,9 +119,9 @@ class AlgorithmVisualizerHandler {
 		this.#currentVisualizer = "none";
 
 		this.#availableVisualizers  = {
-			"bfs": new BFSVisualizer(graphUI, this.#algorithmStepsLogger),
-			"dfs": new DFSVisualizer(graphUI, this.#algorithmStepsLogger),
-			"dijkstra": new DijkstraVisualizer(graphUI, this.#algorithmStepsLogger),
+			"bfs": new BFSVisualizer(graphDrawingEngine, this.#algorithmStepsLogger),
+			"dfs": new DFSVisualizer(graphDrawingEngine, this.#algorithmStepsLogger),
+			"dijkstra": new DijkstraVisualizer(graphDrawingEngine, this.#algorithmStepsLogger),
 			"none": null
 		};
 
@@ -156,7 +158,6 @@ class AlgorithmVisualizerHandler {
 
 		this.#visualizationSelectionEl.addEventListener("change", function(event) {
 			self.#currentVisualizer = event.target.value;
-			self.#algorithmStepsLogger.clear();
 			self.#visualizationInstructionsEl.textContent = "";
 		
 			if (self.#currentVisualizer === "none")
@@ -176,9 +177,9 @@ class AlgorithmVisualizerHandler {
 			let oppositeText = btnType === "stop drawing" ? "continue drawing" : "stop drawing";
 
 			if (btnType === "stop drawing")
-				graphUI.stopDrawing();
+				graphDrawingEngine.stopDrawing();
 			else
-				graphUI.drawGraph();
+				graphDrawingEngine.drawGraph();
 
 			this.textContent = oppositeText;
 		})

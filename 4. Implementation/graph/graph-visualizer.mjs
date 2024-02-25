@@ -19,7 +19,7 @@ export class EdgeUi {
 		this.line.display();
 	}
 
-	getCoords(x1, y1, x2, y2) {
+	#getCoords(x1, y1, x2, y2) {
 		const r = this.from.radius;
 		const angle = Math.atan(Math.abs(x2-x1) / Math.abs(y2-y1));
 		const a = r*Math.cos(angle);
@@ -66,13 +66,13 @@ export class EdgeUi {
 		const x2 = this.to.x;
 		const y2 = this.to.y;
 		
-		const [fromX, fromY] = this.getCoords(x1, y1, x2, y2);
-		const [toX, toY] = this.getCoords(x2, y2, x1, y1);
+		const [fromX, fromY] = this.#getCoords(x1, y1, x2, y2);
+		const [toX, toY] = this.#getCoords(x2, y2, x1, y1);
 
 		this.line.setCoords(fromX, fromY, toX, toY);
 		this.line.setHasArrow(this.directedEdge);
 		this.line.setLabel(this.weight);
-	}
+	} 
 }
 
 class ObjectIdMapper {
@@ -81,12 +81,12 @@ class ObjectIdMapper {
 		this.idToObj = new Map();
 	}
 
-	getId(obj, strObj = "") {
-		if (this.objToId.has(strObj))
-			return this.objToId.get(strObj);
+	getId(obj, strVal = "") {
+		if (this.objToId.has(strVal))
+			return this.objToId.get(strVal);
 
 		const id = this.objToId.size;
-		this.objToId.set(strObj, id);
+		this.objToId.set(strVal, id);
 		this.idToObj.set(id, obj);
 
 		return id;
@@ -103,8 +103,8 @@ class ObjectIdMapper {
 		return this.idToObj.has(id);
 	}
 
-	objExist(strObj) {
-		return this.objToId.has(strObj);
+	objExist(strVal) {
+		return this.objToId.has(strVal);
 	}
 
 	print() {
@@ -201,13 +201,13 @@ export class Graph {
 		return new Set(this.nodes);
 	}
 
-	getDirectedAdjList() {
-		return this.#removeAdjListWeights(this.getDirectedAdjListWithWeights());
+	getAdjList() {
+		return this.#removeAdjListWeights(this.getAdjListWithWeights());
 	}
 	getUndirectedAdjList() {
 		return this.#removeAdjListWeights(this.getUndirectedAdjListWithWeights());
 	}
-	getDirectedAdjListWithWeights() {
+	getAdjListWithWeights() {
 		const adjList = this.#initializeAdjList(this.nodes.size, Array);
 
 		for (const {from, to, weight} of this.edgeList)
@@ -226,11 +226,11 @@ export class Graph {
 	}
 
 	getNeighbours(node) {
-		const adjList = this.getDirectedAdjList();
+		const adjList = this.getAdjList();
 		return adjList[node];
 	} 
 	getNeighboursWithWeights(node) {
-		const adjList = this.getDirectedAdjListWithWeights();
+		const adjList = this.getAdjListWithWeights();
 		return adjList[node];
 	}
 	getWeights(from, to) {
@@ -273,7 +273,7 @@ export class Graph {
 	}
 }
 
-export class GraphUi {
+export class GraphDrawingEngine {
 	constructor() {
 		this.nodeMapper = new ObjectIdMapper();
 		this.graph = new Graph();
