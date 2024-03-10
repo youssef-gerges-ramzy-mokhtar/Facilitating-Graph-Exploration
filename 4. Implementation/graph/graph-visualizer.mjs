@@ -200,6 +200,9 @@ export class Graph {
 	getNodes() {
 		return new Set(this.nodes);
 	}
+	getNumberOfNodes() {
+		return this.nodes.size;
+	}
 
 	getAdjList() {
 		return this.#removeAdjListWeights(this.getAdjListWithWeights());
@@ -324,13 +327,12 @@ export class GraphDrawingEngine {
 
 	async drawGraph() {
 		const functionLock = this.singleAsync.makeNewCall();
-		const undirectedAdjList = this.graph.getUndirectedAdjList();
 		const rate = 0.01;
 
 		this.displayGraph();
 		for (let i = 0; i < 250; i++) {
-			for (let v = 0; v < undirectedAdjList.length; v++) {
-				if (functionLock.callStopped()) // IMP Question: where is the best pos to check for this condition & WHY?
+			for (let v = 0; v < this.graph.getNumberOfNodes(); v++) {
+				if (functionLock.callStopped()) // mainly used for pefromance reasons to stop previous async calls, and to stop the graph drawing when requested
 					return;
 
 				this.displayGraph();
