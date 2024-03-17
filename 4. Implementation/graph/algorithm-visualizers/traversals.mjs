@@ -239,16 +239,19 @@ export class DijkstraVisualizer extends GraphVisualizer {
 		return algorithmSteps;
 	}
 
-	// still under implementation
 	_logInfo(step) {
-		// write that dijkstra will only work on a directed graph for now
 		const {stepType, data} = step;
 		if (!data) {
 			this.logger.log(`${stepType}: ${step.reason}`);
+			this.logger.log("\n");
 			return;
 		}
 
-		this.logger.log(`Dist = [${data.dist}]`);
+		if (stepType !== "CURRENT_NODE_FINISHED" && stepType !== "EDGE_TRAVERSAL")
+			return;
+
+		const labelledDist = data.dist.map((dist, idx) => `${getNodeName(this.graphDrawingEngine, idx)}: ${dist}`);
+		this.logger.log(`Dist = [${labelledDist}]`);
 		this.logger.log(`Visited = [${getNodeNames(this.graphDrawingEngine, data.vis)}]`);
 		this.logger.log("\n");
 	}
@@ -317,4 +320,8 @@ export class DijkstraVisualizer extends GraphVisualizer {
 
 function getNodeNames(graphDrawingEngine, nodes) {
 	return nodes.map(node => graphDrawingEngine.getCircle(node).content);
+}
+
+function getNodeName(graphDrawingEngine, node) {
+	return graphDrawingEngine.getCircle(node).content;
 }
