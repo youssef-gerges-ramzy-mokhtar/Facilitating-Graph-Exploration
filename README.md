@@ -31,7 +31,7 @@ This is my final year project, and it aims to create a website that displays vis
 ## Running the Project
 - install liver-server using npm <br/>
   ```npm i live-server```
-- clone this repo into your local machine and navigate to "4. Implementation" <br/>
+- clone this repo into your local machine and navigate to "4.implementation" <br/>
   ```cd "Facilitating-Graph-Exploration/4.implementation"```
 - start the local server <br/>
   ```live-server```
@@ -60,5 +60,5 @@ Below is an example of running DFS on the graph starting at node 1:
   ![graph-text-overview](https://github.com/user-attachments/assets/d014d2a1-bf71-475f-aaf2-e726170e4e2b)
 
 ## Final Remarks
-- For more in-depth information about the project, please refer to the [project thesis](https://github.com/youssef-gerges-ramzy-mokhtar/Facilitating-Graph-Exploration/blob/main/5.%20Report/report.pdf)
+- For more in-depth information about the project, please refer to the [project thesis](https://github.com/youssef-gerges-ramzy-mokhtar/Facilitating-Graph-Exploration/blob/main/5.report/report.pdf)
 - I would also like to extend my sincere thanks to Dr. Marco for his guidance and support as my supervisor throughout this project
