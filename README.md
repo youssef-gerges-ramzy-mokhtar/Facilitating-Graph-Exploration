@@ -1,7 +1,7 @@
 # Facilitating-Graph-Exploration
 
 ## Table of Contents
-1. [Project Overview](#-project-overview)
+1. [Project Overview](#project-overview)
 2. []
 
 ## Project Overview
