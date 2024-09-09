@@ -32,7 +32,7 @@ This is my final year project, and it aims to create a website that displays vis
 - install liver-server using npm <br/>
   ```npm i live-server```
 - clone this repo into your local machine and navigate to "4. Implementation" <br/>
-  ```cd "Facilitating-Graph-Exploration/4. Implementation"```
+  ```cd "Facilitating-Graph-Exploration/4.implementation"```
 - start the local server <br/>
   ```live-server```
 - open your browser and go to ```http://localhost:8080/```
