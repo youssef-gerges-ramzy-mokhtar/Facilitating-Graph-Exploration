@@ -1,4 +1,10 @@
 # Facilitating-Graph-Exploration
+
+## Table of Contents
+1. [Project Overview](#-project-overview)
+2. []
+
+## Project Overview
 ![image](https://github.com/user-attachments/assets/7bd913c6-f449-44e4-b8d6-391ba5f18be8)
 
 ## Website Link
