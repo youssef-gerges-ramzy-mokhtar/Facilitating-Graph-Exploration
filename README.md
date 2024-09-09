@@ -2,7 +2,13 @@
 
 ## Table of Contents
 1. [Project Overview](#project-overview)
-2. []
+2. [Website Link](#website-link)
+3. [Description](#description)
+4. [Running the Project](#running-the-project)
+5. [Using the Project](#using-the-project)
+    - [Website Overview](#website-overview)
+    - [Running the Algorithm Visualizer](#running-the-algorithm-visualizer)
+    - [Final Remarks](#final-remarks)
 
 ## Project Overview
 ![image](https://github.com/user-attachments/assets/7bd913c6-f449-44e4-b8d6-391ba5f18be8)
@@ -21,7 +27,7 @@ This is my final year project, and it aims to create a website that displays vis
 - Adjust the speed of the algorithm visualizations
 - View the trace of algorithm execution as it runs
 
-## How to run the project
+## Running the Project
 - install liver-server using npm <br/>
   ```npm i live-server```
 - clone this repo into your local machine and navigate to "4. Implementation" <br/>
@@ -36,7 +42,7 @@ This is my final year project, and it aims to create a website that displays vis
 > [!TIP]
 > You can use an alternative local server package instead of ```live-server``` if you're familiar with it. However, ensure you can run the code without issues on your chosen tool.
 
-## How to use the project
+## Using the Project
 ### Website Overview
 ![website-overview](https://github.com/user-attachments/assets/93d888d7-1264-4027-a7d6-2115a3c0181b)
 
