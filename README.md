@@ -61,4 +61,5 @@ Below is an example of running DFS on the graph starting at node 1:
 
 ## Final Remarks
 - For more in-depth information about the project, please refer to the [project thesis](https://github.com/youssef-gerges-ramzy-mokhtar/Facilitating-Graph-Exploration/blob/main/5.report/report.pdf)
+- If you're looking for a quicker way to navigate through the project's main points, the [viva presentation](https://github.com/youssef-gerges-ramzy-mokhtar/Facilitating-Graph-Exploration/blob/main/6.viva-presentation/viva.pptx) provides a concise and clear summary compared to the full thesis
 - I would also like to extend my sincere thanks to Dr. Marco for his guidance and support as my supervisor throughout this project
