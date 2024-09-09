@@ -8,7 +8,8 @@
 5. [Using the Project](#using-the-project)
     - [Website Overview](#website-overview)
     - [Running the Algorithm Visualizer](#running-the-algorithm-visualizer)
-    - [Final Remarks](#final-remarks)
+    - [Additional Notes](#additional-notes)
+6. [Final Remarks](#final-remarks)
 
 ## Project Overview
 ![image](https://github.com/user-attachments/assets/7bd913c6-f449-44e4-b8d6-391ba5f18be8)
@@ -53,7 +54,11 @@ To run an algorithm visualizer on the graph, click on any of the graph nodes. Th
 Below is an example of running DFS on the graph starting at node 1:
 ![algorithm-overview](https://github.com/user-attachments/assets/41eb6b76-4f14-4c9d-9ef6-c8b32bd5a813)
 
-### Final Remarks
+### Additional Notes
 - While there is an option to display undirected graphs, it is important to note that when running the algorithm visualizers, they operate on the directed graph version inputted by the user
 - Nodes can be labeled with text, as shown below:
   ![graph-text-overview](https://github.com/user-attachments/assets/d014d2a1-bf71-475f-aaf2-e726170e4e2b)
+
+## Final Remarks
+- For more in-depth information about the project, please refer to the [project thesis](https://github.com/youssef-gerges-ramzy-mokhtar/Facilitating-Graph-Exploration/blob/main/5.%20Report/report.pdf)
+- I would also like to extend my sincere thanks to Dr. Marco for his guidance and support as my supervisor throughout this project
